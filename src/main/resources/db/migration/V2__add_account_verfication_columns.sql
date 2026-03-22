@@ -1,0 +1,3 @@
+ALTER TABLE accounts
+    ADD COLUMN is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN verified_at TIMESTAMPTZ;

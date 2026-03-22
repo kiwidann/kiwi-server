@@ -35,23 +35,34 @@ public class Account {
     @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime updatedAt;
 
+
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
+    @Column(name = "is_verified", nullable = false)
+    private Boolean isVerified;
+
+    @Column(name = "verified_at")
+    private OffsetDateTime verifiedAt;
+
     @Builder
     private Account(
             String email,
             String passwordHash,
             Boolean isDeleted,
-            OffsetDateTime deletedAt
+            OffsetDateTime deletedAt,
+            Boolean isVerified,
+            OffsetDateTime verifiedAt
     ) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.isDeleted = isDeleted;
         this.deletedAt = deletedAt;
+        this.isVerified = isVerified;
+        this.verifiedAt = verifiedAt;
     }
 
     public static Account create(String email, String passwordHash) {
@@ -60,6 +71,8 @@ public class Account {
                 .passwordHash(passwordHash)
                 .isDeleted(false)
                 .deletedAt(null)
+                .isVerified(false)
+                .verifiedAt(null)
                 .build();
     }
 
@@ -75,5 +88,10 @@ public class Account {
     public void restore() {
         this.isDeleted = false;
         this.deletedAt = null;
+    }
+
+    public void verify(OffsetDateTime verifiedAt) {
+        this.isVerified = true;
+        this.verifiedAt = verifiedAt;
     }
 }
