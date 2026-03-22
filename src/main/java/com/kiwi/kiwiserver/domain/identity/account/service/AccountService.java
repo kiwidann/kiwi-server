@@ -1,5 +1,7 @@
 package com.kiwi.kiwiserver.domain.identity.account.service;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
+import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
 import com.kiwi.kiwiserver.domain.identity.account.exception.AccountErrorCode;
 import com.kiwi.kiwiserver.domain.identity.account.mapper.AccountMapper;
@@ -11,6 +13,7 @@ import com.kiwi.kiwiserver.domain.identity.user.entity.User;
 import com.kiwi.kiwiserver.domain.identity.user.mapper.UserMapper;
 import com.kiwi.kiwiserver.domain.identity.user.repository.UserRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
+import com.kiwi.kiwiserver.global.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class AccountService {
     private final UserMapper userMapper;
     private final SignUpMapper signUpMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
@@ -43,6 +47,41 @@ public class AccountService {
         User savedUser = userRepository.save(user);
 
         return signUpMapper.toResponse(savedAccount, savedUser);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        // 이메일에 해당하는 계정이 없는 경우
+        Account account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.INVALID_CREDENTIALS));
+
+        // 탈퇴한 계정인 경우
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        // 비밀번호가 일치하지 않은 경우
+        if (!passwordEncoder.matches(request.getPassword(), account.getPasswordHash())) {
+            throw new BusinessException(AccountErrorCode.INVALID_CREDENTIALS);
+        }
+
+        // 계정에 연결된 사용자 정보가 없는 경우
+        User user = userRepository.findByAccount_AccountId(account.getAccountId())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        // 토큰 생성
+        String accessToken = jwtProvider.generateAccessToken(
+                account.getAccountId(),
+                user.getUserId(),
+                account.getEmail()
+        );
+
+        return LoginResponse.builder()
+                .accountId(account.getAccountId())
+                .userId(user.getUserId())
+                .email(account.getEmail())
+                .nickname(user.getNickname())
+                .accessToken(accessToken)
+                .build();
     }
 
     private void validateDuplicateEmail(String email) {

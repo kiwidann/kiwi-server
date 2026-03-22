@@ -1,5 +1,7 @@
 package com.kiwi.kiwiserver.domain.identity.account.controller;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
+import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.service.AccountService;
 import com.kiwi.kiwiserver.domain.identity.common.dto.request.SignUpRequest;
 import com.kiwi.kiwiserver.domain.identity.common.dto.response.SignUpResponse;
@@ -25,6 +27,15 @@ public class AccountController {
             @Valid @RequestBody SignUpRequest request
     ) {
         SignUpResponse response = accountService.signUp(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다")
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody LoginRequest request
+    ) {
+        LoginResponse response = accountService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
