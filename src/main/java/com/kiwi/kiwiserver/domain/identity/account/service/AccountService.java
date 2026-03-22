@@ -13,7 +13,7 @@ import com.kiwi.kiwiserver.domain.identity.user.entity.User;
 import com.kiwi.kiwiserver.domain.identity.user.mapper.UserMapper;
 import com.kiwi.kiwiserver.domain.identity.user.repository.UserRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
-import com.kiwi.kiwiserver.global.security.JwtProvider;
+import com.kiwi.kiwiserver.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

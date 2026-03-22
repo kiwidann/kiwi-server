@@ -1,5 +1,6 @@
-package com.kiwi.kiwiserver.global.security;
+package com.kiwi.kiwiserver.global.security.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -34,5 +35,39 @@ public class JwtProvider {
                 .expiration(expiry)
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public Long getAccountId(String token) {
+        return Long.valueOf(getClaims(token).getSubject());
+    }
+
+    public Long getUserId(String token) {
+        Object userId = getClaims(token).get("userId");
+        return Long.valueOf(String.valueOf(userId));
+    }
+
+    public String getEmail(String token) {
+        Object email = getClaims(token).get("email");
+        return String.valueOf(email);
     }
 }
