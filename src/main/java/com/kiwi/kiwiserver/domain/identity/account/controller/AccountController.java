@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.controller;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.ChangePasswordRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.RefreshTokenRequest;
@@ -51,13 +52,21 @@ public class AccountController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "비밀번호 변경", description = "현재 로그인한 사용자의 비밀번호를 변경합니다")
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        accountService.changePassword(request);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
     @Operation(summary = "로그아웃", description = "현재 로그인한 계정의 리프레시 토큰을 삭제합니다")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
         accountService.logout();
         return ResponseEntity.ok(ApiResponse.success());
     }
-
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인한 계정을 탈퇴 처리합니다")
     @DeleteMapping("/me")

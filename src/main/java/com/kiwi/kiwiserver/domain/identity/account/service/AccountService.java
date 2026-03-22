@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.service;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.ChangePasswordRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.RefreshTokenRequest;
@@ -169,6 +170,35 @@ public class AccountService {
         }
 
         account.softDelete(OffsetDateTime.now());
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        Long accountId = SecurityUtils.getCurrentAccountId();
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        // 현재 비밀번호 일치 여부 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPasswordHash())) {
+            throw new BusinessException(AccountErrorCode.INVALID_PASSWORD);
+        }
+
+        // 새 비밀번호가 현재 비밀번호와 같은지 확인
+        if (passwordEncoder.matches(request.getNewPassword(), account.getPasswordHash())) {
+            throw new BusinessException(AccountErrorCode.PASSWORD_SAME_AS_OLD);
+        }
+
+        // 새 비밀번호 해시 처리 후 저장
+        String newPasswordHash = passwordEncoder.encode(request.getNewPassword());
+        account.updatePasswordHash(newPasswordHash);
+
+        // 보안상 기존 refresh token 제거
+        refreshTokenService.delete(accountId);
     }
 
     private void validateDuplicateEmail(String email) {
