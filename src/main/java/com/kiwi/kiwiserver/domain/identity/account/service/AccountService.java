@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.service;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
@@ -14,10 +15,13 @@ import com.kiwi.kiwiserver.domain.identity.user.mapper.UserMapper;
 import com.kiwi.kiwiserver.domain.identity.user.repository.UserRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import com.kiwi.kiwiserver.global.security.jwt.JwtProvider;
+import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +86,24 @@ public class AccountService {
                 .nickname(user.getNickname())
                 .accessToken(accessToken)
                 .build();
+    }
+
+    @Transactional
+    public void deleteMyAccount(DeleteAccountRequest request) {
+        Long accountId = SecurityUtils.getCurrentAccountId();
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.ALREADY_DELETED_ACCOUNT);
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), account.getPasswordHash())) {
+            throw new BusinessException(AccountErrorCode.INVALID_PASSWORD);
+        }
+
+        account.softDelete(OffsetDateTime.now());
     }
 
     private void validateDuplicateEmail(String email) {

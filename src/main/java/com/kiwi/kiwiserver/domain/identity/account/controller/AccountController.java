@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.controller;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.service.AccountService;
@@ -37,5 +38,15 @@ public class AccountController {
     ) {
         LoginResponse response = accountService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 계정을 탈퇴 처리합니다")
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deleteMyAccount(
+            @Valid @RequestBody DeleteAccountRequest request
+    ) {
+        accountService.deleteMyAccount(request);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
