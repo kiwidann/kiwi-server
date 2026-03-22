@@ -2,7 +2,9 @@ package com.kiwi.kiwiserver.domain.identity.account.controller;
 
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.RefreshTokenRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
+import com.kiwi.kiwiserver.domain.identity.account.dto.response.RefreshTokenResponse;
 import com.kiwi.kiwiserver.domain.identity.account.service.AccountService;
 import com.kiwi.kiwiserver.domain.identity.common.dto.request.SignUpRequest;
 import com.kiwi.kiwiserver.domain.identity.common.dto.response.SignUpResponse;
@@ -38,6 +40,22 @@ public class AccountController {
     ) {
         LoginResponse response = accountService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 access token을 재발급합니다")
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<RefreshTokenResponse>> refresh(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        RefreshTokenResponse response = accountService.refresh(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "로그아웃", description = "현재 로그인한 계정의 리프레시 토큰을 삭제합니다")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        accountService.logout();
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
 

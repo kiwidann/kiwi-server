@@ -12,4 +12,5 @@ public class LoginResponse {
     private String email;
     private String nickname;
     private String accessToken;
+    private String refreshToken;
 }

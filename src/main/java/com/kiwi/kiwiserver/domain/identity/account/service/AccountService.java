@@ -2,7 +2,9 @@ package com.kiwi.kiwiserver.domain.identity.account.service;
 
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.RefreshTokenRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
+import com.kiwi.kiwiserver.domain.identity.account.dto.response.RefreshTokenResponse;
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
 import com.kiwi.kiwiserver.domain.identity.account.exception.AccountErrorCode;
 import com.kiwi.kiwiserver.domain.identity.account.mapper.AccountMapper;
@@ -15,6 +17,7 @@ import com.kiwi.kiwiserver.domain.identity.user.mapper.UserMapper;
 import com.kiwi.kiwiserver.domain.identity.user.repository.UserRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import com.kiwi.kiwiserver.global.security.jwt.JwtProvider;
+import com.kiwi.kiwiserver.global.security.refresh.RefreshTokenService;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +38,7 @@ public class AccountService {
     private final SignUpMapper signUpMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
@@ -72,11 +76,21 @@ public class AccountService {
         User user = userRepository.findByAccount_AccountId(account.getAccountId())
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
-        // 토큰 생성
+        // access token 생성
         String accessToken = jwtProvider.generateAccessToken(
                 account.getAccountId(),
                 user.getUserId(),
                 account.getEmail()
+        );
+
+        // refresh token 생성
+        String refreshToken = jwtProvider.generateRefreshToken(account.getAccountId());
+
+        // Redis에 refresh token 저장
+        refreshTokenService.save(
+                account.getAccountId(),
+                refreshToken,
+                jwtProvider.getRefreshTokenExpirationMs()
         );
 
         return LoginResponse.builder()
@@ -85,7 +99,55 @@ public class AccountService {
                 .email(account.getEmail())
                 .nickname(user.getNickname())
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
+    }
+
+    // access token 재발급 함수
+    public RefreshTokenResponse refresh(RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+
+        // 요청으로 들어온 refresh token의 유효성 검증
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new BusinessException(AccountErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // refresh token에서 accountId 추출
+        Long accountId = jwtProvider.getAccountId(refreshToken);
+
+        // Redis에 저장된 refresh token과 일치하는지 확인
+        if (!refreshTokenService.matches(accountId, refreshToken)) {
+            throw new BusinessException(AccountErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // account 테이블에 존재하는 계정인지 확인
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        // 탈퇴한 계정인지 확인
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        // 계정에 연결된 사용자 정보가 있는지 확인
+        User user = userRepository.findByAccount_AccountId(account.getAccountId())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        // 새로운 access token 발급
+        String newAccessToken = jwtProvider.generateAccessToken(
+                account.getAccountId(),
+                user.getUserId(),
+                account.getEmail()
+        );
+
+        return RefreshTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .build();
+    }
+
+    public void logout() {
+        Long accountId = SecurityUtils.getCurrentAccountId();
+        refreshTokenService.delete(accountId);   // Redis에 저장된 refresh token 삭제
     }
 
     @Transactional

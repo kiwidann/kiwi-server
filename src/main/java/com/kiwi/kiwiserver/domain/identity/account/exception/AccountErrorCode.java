@@ -12,7 +12,8 @@ public enum AccountErrorCode implements BaseErrorCode {
     DELETED_ACCOUNT(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "탈퇴한 계정입니다"),
     INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, "ACCOUNT_401", "이메일 또는 비밀번호가 올바르지 않습니다"),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "비밀번호가 올바르지 않습니다"),
-    ALREADY_DELETED_ACCOUNT(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "이미 탈퇴한 계정입니다");
+    ALREADY_DELETED_ACCOUNT(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "이미 탈퇴한 계정입니다"),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "ACCOUNT_401", "유효하지 않은 리프레시 토큰입니다");
 
     private final HttpStatus status;
     private final String code;
