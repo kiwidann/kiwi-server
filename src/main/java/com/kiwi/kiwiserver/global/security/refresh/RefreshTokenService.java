@@ -34,6 +34,14 @@ public class RefreshTokenService {
         stringRedisTemplate.delete(createKey(accountId));
     }
 
+    // 기존 refresh token 값을 유지한 채 TTL만 연장
+    public void extendExpiration(Long accountId, long expirationMs) {
+        stringRedisTemplate.expire(
+                createKey(accountId),
+                Duration.ofMillis(expirationMs)
+        );
+    }
+
     private String createKey(Long accountId) {
         return PREFIX + accountId;
     }

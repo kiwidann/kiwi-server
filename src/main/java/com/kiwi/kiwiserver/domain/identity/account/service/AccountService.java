@@ -140,6 +140,9 @@ public class AccountService {
                 account.getEmail()
         );
 
+        // refresh token 재사용을 허용하면서 만료 시간만 연장
+        refreshTokenService.extendExpiration(accountId, jwtProvider.getRefreshTokenExpirationMs());
+
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
                 .build();
