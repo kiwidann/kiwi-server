@@ -1,14 +1,14 @@
 package com.kiwi.kiwiserver.domain.identity.account.mapper;
 
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.CreateAccountRequest;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.AccountResponse;
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
+import com.kiwi.kiwiserver.domain.identity.common.dto.request.SignUpRequest;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AccountMapper {
 
-    public Account toEntity(CreateAccountRequest request, String passwordHash) {
+    public Account toEntity(SignUpRequest request, String passwordHash) {
         return Account.create(
                 request.getEmail(),
                 passwordHash
