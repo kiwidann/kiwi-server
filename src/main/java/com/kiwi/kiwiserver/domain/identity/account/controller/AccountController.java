@@ -1,9 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.controller;
 
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.ChangePasswordRequest;
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.RefreshTokenRequest;
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.*;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.RefreshTokenResponse;
 import com.kiwi.kiwiserver.domain.identity.account.service.AccountService;
@@ -32,6 +29,24 @@ public class AccountController {
     ) {
         SignUpResponse response = accountService.signUp(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "이메일 인증 코드 발송", description = "회원가입한 이메일로 인증 코드를 발송합니다")
+    @PostMapping("/email/send-verification")
+    public ResponseEntity<ApiResponse<Void>> sendVerificationEmail(
+            @Valid @RequestBody SendVerificationEmailRequest request
+    ) {
+        accountService.sendVerificationEmail(request);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @Operation(summary = "이메일 인증 코드 확인", description = "이메일 인증 코드를 검증합니다")
+    @PostMapping("/email/verify")
+    public ResponseEntity<ApiResponse<Void>> verifyEmailCode(
+            @Valid @RequestBody VerifyEmailCodeRequest request
+    ) {
+        accountService.verifyEmailCode(request);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다")

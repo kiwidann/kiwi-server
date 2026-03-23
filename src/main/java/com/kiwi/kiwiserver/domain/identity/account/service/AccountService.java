@@ -1,9 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.service;
 
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.ChangePasswordRequest;
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.DeleteAccountRequest;
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.LoginRequest;
-import com.kiwi.kiwiserver.domain.identity.account.dto.request.RefreshTokenRequest;
+import com.kiwi.kiwiserver.domain.identity.account.dto.request.*;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.RefreshTokenResponse;
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
@@ -17,6 +14,7 @@ import com.kiwi.kiwiserver.domain.identity.user.entity.User;
 import com.kiwi.kiwiserver.domain.identity.user.mapper.UserMapper;
 import com.kiwi.kiwiserver.domain.identity.user.repository.UserRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
+import com.kiwi.kiwiserver.global.mail.MailService;
 import com.kiwi.kiwiserver.global.security.jwt.JwtProvider;
 import com.kiwi.kiwiserver.global.security.refresh.RefreshTokenService;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
@@ -35,11 +33,13 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final AccountMapper accountMapper;
-    private final UserMapper userMapper;
+    private final UserMapper userMapper; 
     private final SignUpMapper signUpMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final EmailVerificationService emailVerificationService;
+    private final MailService mailService;
 
     @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
@@ -58,6 +58,49 @@ public class AccountService {
         return signUpMapper.toResponse(savedAccount, savedUser);
     }
 
+    @Transactional
+    public void sendVerificationEmail(SendVerificationEmailRequest request) {
+        Account account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        if (Boolean.TRUE.equals(account.getIsVerified())) {
+            throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
+        }
+
+        String code = emailVerificationService.generateAndSaveCode(account.getEmail());
+        mailService.sendVerificationCode(account.getEmail(), code);
+    }
+
+    @Transactional
+    public void verifyEmailCode(VerifyEmailCodeRequest request) {
+        Account account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        if (Boolean.TRUE.equals(account.getIsVerified())) {
+            throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
+        }
+
+        String savedCode = emailVerificationService.findCode(account.getEmail());
+        if (savedCode == null) {
+            throw new BusinessException(AccountErrorCode.VERIFICATION_CODE_NOT_FOUND);
+        }
+
+        if (!emailVerificationService.matches(account.getEmail(), request.getCode())) {
+            throw new BusinessException(AccountErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        account.verify(OffsetDateTime.now());
+        emailVerificationService.delete(account.getEmail());
+    }
+
     public LoginResponse login(LoginRequest request) {
         // 이메일에 해당하는 계정이 없는 경우
         Account account = accountRepository.findByEmail(request.getEmail())
@@ -66,6 +109,11 @@ public class AccountService {
         // 탈퇴한 계정인 경우
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
             throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        // 이메일 인증이 완료되지 않은 경우
+        if (!Boolean.TRUE.equals(account.getIsVerified())) {
+            throw new BusinessException(AccountErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         // 비밀번호가 일치하지 않은 경우

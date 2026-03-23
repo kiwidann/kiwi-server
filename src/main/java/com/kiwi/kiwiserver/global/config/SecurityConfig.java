@@ -22,6 +22,8 @@ public class SecurityConfig {
                                 "/api/accounts/signup",
                                 "/api/accounts/login",
                                 "/api/accounts/refresh",
+                                "/api/accounts/email/send-verification",
+                                "/api/accounts/email/verify",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs",
