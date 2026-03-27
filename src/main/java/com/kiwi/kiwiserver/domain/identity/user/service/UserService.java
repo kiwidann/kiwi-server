@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.user.service;
 
+import com.kiwi.kiwiserver.domain.identity.user.dto.request.UpdateNicknameRequest;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
 import com.kiwi.kiwiserver.domain.identity.user.dto.response.UserResponse;
@@ -24,6 +25,19 @@ public class UserService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    public UserResponse updateMyNickname(UpdateNicknameRequest request) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        // 현재 로그인한 사용자의 닉네임 수정
+        user.updateNickname(request.getNickname());
 
         return userMapper.toResponse(user);
     }
