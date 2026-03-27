@@ -133,6 +133,12 @@ public class EmailVerificationService {
         return COOLDOWN_PREFIX + email;
     }
 
+    // 재전송 제한의 남은 시간(초) 조회
+    public long getCooldownRemainingSeconds(String email) {
+        Long seconds = stringRedisTemplate.getExpire(createCooldownKey(email));
+        return seconds == null || seconds < 0 ? 0 : seconds;
+    }
+
     private String createAttemptKey(String email) {
         return ATTEMPT_PREFIX + email;
     }

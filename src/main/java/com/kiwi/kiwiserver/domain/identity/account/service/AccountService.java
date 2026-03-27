@@ -5,6 +5,7 @@ import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.RefreshTokenResponse;
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
 import com.kiwi.kiwiserver.domain.identity.account.exception.AccountErrorCode;
+import com.kiwi.kiwiserver.domain.identity.account.exception.TooManyVerificationRequestsException;
 import com.kiwi.kiwiserver.domain.identity.account.mapper.AccountMapper;
 import com.kiwi.kiwiserver.domain.identity.account.repository.AccountRepository;
 import com.kiwi.kiwiserver.domain.identity.common.dto.request.SignUpRequest;
@@ -79,9 +80,10 @@ public class AccountService {
             throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_SENDS);
         }
 
-        // 짧은 시간 내 반복 발송 요청 방지
+        // 재전송 제한이 남아 있으면 남은 시간을 함께 반환
         if (emailVerificationService.isCooldownActive(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_REQUESTS);
+            long retryAfterSeconds = emailVerificationService.getCooldownRemainingSeconds(account.getEmail());
+            throw new TooManyVerificationRequestsException(retryAfterSeconds);
         }
 
         // 인증 코드 생성 및 Redis 저장
@@ -297,9 +299,10 @@ public class AccountService {
             throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_SENDS);
         }
 
-        // 재전송 제한 확인
+        // 재전송 제한이 남아 있으면 남은 시간을 함께 반환
         if (emailVerificationService.isCooldownActive(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_REQUESTS);
+            long retryAfterSeconds = emailVerificationService.getCooldownRemainingSeconds(account.getEmail());
+            throw new TooManyVerificationRequestsException(retryAfterSeconds);
         }
 
         // 인증 코드 생성 및 저장

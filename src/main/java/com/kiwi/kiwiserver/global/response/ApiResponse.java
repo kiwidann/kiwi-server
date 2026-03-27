@@ -19,11 +19,19 @@ public class ApiResponse<T> {
         this.message = message;
     }
 
-    public static <T> ApiResponse<T> success(final T data) {return new ApiResponse<T>(true, data, null, null);}
+    public static <T> ApiResponse<T> success(final T data) {
+        return new ApiResponse<>(true, data, null, null);
+    }
 
-    public static ApiResponse<Void> success() {return new ApiResponse<Void>(true, null, null, null);}
+    public static ApiResponse<Void> success() {
+        return new ApiResponse<>(true, null, null, null);
+    }
 
     public static ApiResponse<Void> error(String errorCode, String message) {
         return new ApiResponse<>(false, null, errorCode, message);
+    }
+
+    public static <T> ApiResponse<T> error(String errorCode, String message, T data) {
+        return new ApiResponse<>(false, data, errorCode, message);
     }
 }

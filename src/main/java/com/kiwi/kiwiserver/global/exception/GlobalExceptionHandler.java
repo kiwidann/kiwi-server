@@ -1,5 +1,7 @@
 package com.kiwi.kiwiserver.global.exception;
 
+import com.kiwi.kiwiserver.domain.identity.account.dto.response.RetryAfterResponse;
+import com.kiwi.kiwiserver.domain.identity.account.exception.TooManyVerificationRequestsException;
 import com.kiwi.kiwiserver.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
+    }
+
+    // 재전송 제한 예외 발생 시 남은 대기 시간을 함께 응답
+    @ExceptionHandler(TooManyVerificationRequestsException.class)
+    public ResponseEntity<ApiResponse<RetryAfterResponse>> handleTooManyVerificationRequestsException(
+            final TooManyVerificationRequestsException e
+    ) {
+        RetryAfterResponse data = RetryAfterResponse.builder()
+                .retryAfterSeconds(e.getRetryAfterSeconds())
+                .build();
+
+        return ResponseEntity
+                .status(429)
+                .body(ApiResponse.error("ACCOUNT_429", e.getMessage(), data));
     }
 
     // DTO @Valid 검증 실패
