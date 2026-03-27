@@ -309,7 +309,7 @@ public class AccountService {
         String code = emailVerificationService.generateAndSaveCode(account.getEmail());
 
         // 비밀번호 재설정용 인증 코드 메일 발송
-        mailService.sendVerificationCode(account.getEmail(), code);
+        mailService.sendResetPasswordCode(account.getEmail(), code);
     }
 
     // 인증 코드 검증 성공 시 비밀번호 재설정 가능 상태를 Redis에 저장
