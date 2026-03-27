@@ -91,4 +91,31 @@ public class AccountController {
         accountService.deleteMyAccount(request);
         return ResponseEntity.ok(ApiResponse.success());
     }
+
+    @Operation(summary = "비밀번호 재설정 코드 발송", description = "비밀번호 재설정을 위한 인증 코드를 이메일로 발송합니다")
+    @PostMapping("/password/send-reset-code")
+    public ResponseEntity<ApiResponse<Void>> sendResetPasswordCode(
+            @Valid @RequestBody SendResetPasswordCodeRequest request
+    ) {
+        accountService.sendResetPasswordCode(request);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @Operation(summary = "비밀번호 재설정 코드 검증", description = "비밀번호 재설정용 인증 코드를 검증합니다")
+    @PostMapping("/password/verify-reset-code")
+    public ResponseEntity<ApiResponse<Void>> verifyResetPasswordCode(
+            @Valid @RequestBody VerifyResetPasswordCodeRequest request
+    ) {
+        accountService.verifyResetPasswordCode(request);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @Operation(summary = "비밀번호 재설정", description = "인증 완료 후 새 비밀번호로 재설정합니다")
+    @PatchMapping("/password/reset")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+    ) {
+        accountService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 }

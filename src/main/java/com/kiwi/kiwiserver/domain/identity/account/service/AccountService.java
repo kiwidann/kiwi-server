@@ -40,6 +40,7 @@ public class AccountService {
     private final RefreshTokenService refreshTokenService;
     private final EmailVerificationService emailVerificationService;
     private final MailService mailService;
+    private final PasswordResetService passwordResetService;
 
     @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
@@ -269,6 +270,96 @@ public class AccountService {
 
         // 보안상 기존 refresh token 제거
         refreshTokenService.delete(accountId);
+    }
+
+    // 비밀번호 재설정은 인증된 이메일 계정에 대해서 허용
+    @Transactional
+    public void sendResetPasswordCode(SendResetPasswordCodeRequest request) {
+        Account account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        if (!Boolean.TRUE.equals(account.getIsVerified())) {
+            throw new BusinessException(AccountErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
+        // 재전송 제한 확인
+        if (emailVerificationService.isCooldownActive(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_REQUESTS);
+        }
+
+        // 인증 코드 생성 및 저장
+        String code = emailVerificationService.generateAndSaveCode(account.getEmail());
+
+        // 비밀번호 재설정용 인증 코드 메일 발송
+        mailService.sendVerificationCode(account.getEmail(), code);
+    }
+
+    // 인증 코드 검증 성공 시 비밀번호 재설정 가능 상태를 Redis에 저장
+    @Transactional
+    public void verifyResetPasswordCode(VerifyResetPasswordCodeRequest request) {
+        Account account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        String savedCode = emailVerificationService.findCode(account.getEmail());
+        if (savedCode == null) {
+            throw new BusinessException(AccountErrorCode.VERIFICATION_CODE_NOT_FOUND);
+        }
+
+        // brute-force 방지를 위해 시도 횟수 초과 여부 확인
+        if (emailVerificationService.isAttemptExceeded(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_ATTEMPTS);
+        }
+
+        // 인증 코드가 틀리면 실패 횟수 증가
+        if (!emailVerificationService.matches(account.getEmail(), request.getCode())) {
+            emailVerificationService.increaseAttempt(account.getEmail());
+            throw new BusinessException(AccountErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        // 비밀번호 재설정 가능 상태 부여
+        passwordResetService.markResetAllowed(account.getEmail());
+
+        // 인증 코드 관련 Redis 데이터 삭제
+        emailVerificationService.clearVerificationData(account.getEmail());
+    }
+
+    // 재설정 코드 검증이 끝난 이메일만 비밀번호 재설정 가능
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        Account account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (Boolean.TRUE.equals(account.getIsDeleted())) {
+            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+        }
+
+        // 재설정 인증 완료 상태인지 확인
+        if (!passwordResetService.isResetAllowed(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.RESET_PASSWORD_NOT_ALLOWED);
+        }
+
+        // 기존 비밀번호와 동일한지 확인
+        if (passwordEncoder.matches(request.getNewPassword(), account.getPasswordHash())) {
+            throw new BusinessException(AccountErrorCode.PASSWORD_SAME_AS_OLD);
+        }
+
+        // 새 비밀번호 해시 후 저장
+        String newPasswordHash = passwordEncoder.encode(request.getNewPassword());
+        account.updatePasswordHash(newPasswordHash);
+
+        // 기존 refresh token 제거
+        refreshTokenService.delete(account.getAccountId());
+
+        // 재설정 가능 상태 삭제
+        passwordResetService.clearResetAllowed(account.getEmail());
     }
 
     private void validateDuplicateEmail(String email) {
