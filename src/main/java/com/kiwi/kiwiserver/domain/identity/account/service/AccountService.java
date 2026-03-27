@@ -64,6 +64,7 @@ public class AccountService {
         Account account = accountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
+        // 탈퇴한 계정은 인증 메일 발송 불가
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
             throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
         }
@@ -71,6 +72,11 @@ public class AccountService {
         // 이미 인증된 계정은 재인증 불필요
         if (Boolean.TRUE.equals(account.getIsVerified())) {
             throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
+        }
+
+        // 일정 시간 내 인증 코드 발송 횟수 초과 여부 확인
+        if (emailVerificationService.isSendCountExceeded(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_SENDS);
         }
 
         // 짧은 시간 내 반복 발송 요청 방지
@@ -284,6 +290,11 @@ public class AccountService {
 
         if (!Boolean.TRUE.equals(account.getIsVerified())) {
             throw new BusinessException(AccountErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
+        // 일정 시간 내 인증 코드 발송 횟수 초과 여부 확인
+        if (emailVerificationService.isSendCountExceeded(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_SENDS);
         }
 
         // 재전송 제한 확인

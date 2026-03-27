@@ -17,10 +17,15 @@ public class EmailVerificationService {
     private static final String COOLDOWN_PREFIX = "email-verification:cooldown:";
     // 인증 코드 입력 실패 횟수 저장용
     private static final String ATTEMPT_PREFIX = "email-verification:attempt:";
+    // 발송 횟수 카운트
+    private static final String SEND_COUNT_PREFIX = "email-verification:send-count:";
 
     private static final long CODE_EXPIRATION_MINUTES = 5;
     private static final long COOLDOWN_SECONDS = 60;
     private static final int MAX_ATTEMPTS = 5;
+
+    private static final int MAX_SEND_COUNT = 10;
+    private static final long SEND_COUNT_WINDOW_HOURS = 1;
 
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -95,6 +100,31 @@ public class EmailVerificationService {
         stringRedisTemplate.delete(createCooldownKey(email));
     }
 
+    // 일정 시간 내 발송 횟수 제한 초과 여부 확인
+    public boolean isSendCountExceeded(String email) {
+        String count = stringRedisTemplate.opsForValue().get(createSendCountKey(email));
+        if (count == null) {
+            return false;
+        }
+
+        return Integer.parseInt(count) >= MAX_SEND_COUNT;
+    }
+
+    // 일정 시간 동안의 발송 횟수 증가
+    private long increaseSendCount(String email) {
+        Long count = stringRedisTemplate.opsForValue().increment(createSendCountKey(email));
+
+        // 첫 발송 시 1시간 TTL 설정
+        if (count != null && count == 1L) {
+            stringRedisTemplate.expire(
+                    createSendCountKey(email),
+                    Duration.ofHours(SEND_COUNT_WINDOW_HOURS)
+            );
+        }
+
+        return count == null ? 0 : count;
+    }
+
     private String createCodeKey(String email) {
         return CODE_PREFIX + email;
     }
@@ -105,6 +135,10 @@ public class EmailVerificationService {
 
     private String createAttemptKey(String email) {
         return ATTEMPT_PREFIX + email;
+    }
+
+    private String createSendCountKey(String email) {
+        return SEND_COUNT_PREFIX + email;
     }
 
     private String generateCode() {

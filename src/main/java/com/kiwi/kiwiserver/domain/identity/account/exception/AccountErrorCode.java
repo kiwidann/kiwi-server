@@ -21,7 +21,8 @@ public enum AccountErrorCode implements BaseErrorCode {
     ALREADY_VERIFIED_ACCOUNT(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "이미 인증이 완료된 계정입니다"),
     TOO_MANY_VERIFICATION_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "ACCOUNT_429", "인증 코드 재전송 요청이 너무 많습니다. 잠시 후 다시 시도해주세요"),
     TOO_MANY_VERIFICATION_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "ACCOUNT_429", "인증 코드 입력 시도 횟수를 초과했습니다. 새 인증 코드를 요청해주세요"),
-    RESET_PASSWORD_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "비밀번호 재설정 인증이 완료되지 않았습니다");
+    RESET_PASSWORD_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "ACCOUNT_400", "비밀번호 재설정 인증이 완료되지 않았습니다"),
+    TOO_MANY_VERIFICATION_SENDS(HttpStatus.TOO_MANY_REQUESTS, "ACCOUNT_429", "인증 코드 발송 횟수를 초과했습니다. 잠시 후 다시 시도해주세요");
 
     private final HttpStatus status;
     private final String code;
