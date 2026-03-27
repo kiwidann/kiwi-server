@@ -67,11 +67,20 @@ public class AccountService {
             throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
         }
 
+        // 이미 인증된 계정은 재인증 불필요
         if (Boolean.TRUE.equals(account.getIsVerified())) {
             throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
         }
 
+        // 짧은 시간 내 반복 발송 요청 방지
+        if (emailVerificationService.isCooldownActive(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_REQUESTS);
+        }
+
+        // 인증 코드 생성 및 Redis 저장
         String code = emailVerificationService.generateAndSaveCode(account.getEmail());
+
+        // 사용자 이메일로 인증 코드 전송
         mailService.sendVerificationCode(account.getEmail(), code);
     }
 
@@ -80,25 +89,38 @@ public class AccountService {
         Account account = accountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
+        // 탈퇴한 계정은 인증 처리 불가
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
             throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
         }
 
+        // 이미 인증된 계정은 다시 인증할 필요 없음
         if (Boolean.TRUE.equals(account.getIsVerified())) {
             throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
         }
 
+        // Redis에 인증 코드가 없으면 만료되었거나 발급되지 않은 상태
         String savedCode = emailVerificationService.findCode(account.getEmail());
         if (savedCode == null) {
             throw new BusinessException(AccountErrorCode.VERIFICATION_CODE_NOT_FOUND);
         }
 
+        // brute-force 방지를 위해 시도 횟수 초과 여부 확인
+        if (emailVerificationService.isAttemptExceeded(account.getEmail())) {
+            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_ATTEMPTS);
+        }
+
+        // 인증 코드가 틀리면 실패 횟수 증가
         if (!emailVerificationService.matches(account.getEmail(), request.getCode())) {
+            emailVerificationService.increaseAttempt(account.getEmail());
             throw new BusinessException(AccountErrorCode.INVALID_VERIFICATION_CODE);
         }
 
+        // 인증 완료 처리
         account.verify(OffsetDateTime.now());
-        emailVerificationService.delete(account.getEmail());
+
+        // 인증 성공 후 Redis에 남아 있는 관련 데이터 정리
+        emailVerificationService.clearVerificationData(account.getEmail());
     }
 
     public LoginResponse login(LoginRequest request) {
