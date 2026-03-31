@@ -10,9 +10,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,43 +34,41 @@ public class DiaryController {
     }
 
     @GetMapping("/records/{recordId}")
-    @Operation(summary = "특정 기록의 일기 목록 조회")
-    public ApiResponse<List<DiaryResponse>> getDiaries(
+    @Operation(summary = "특정 기록의 일기 조회")
+    public ApiResponse<DiaryResponse> getDiaryByRecord(
             @PathVariable Long recordId
     ) {
         Long userId = SecurityUtils.getCurrentUserId();
-        return ApiResponse.success(diaryService.getDiaries(userId, recordId));
+        return ApiResponse.success(diaryService.getDiaryByRecord(userId, recordId));
     }
 
-    @GetMapping("/records/{recordId}/{diaryId}")
-    @Operation(summary = "일기 단건 조회")
-    public ApiResponse<DiaryResponse> getDiary(
-            @PathVariable Long recordId,
-            @PathVariable Long diaryId
-    ) {
-        Long userId = SecurityUtils.getCurrentUserId();
-        return ApiResponse.success(diaryService.getDiary(userId, recordId, diaryId));
-    }
-
-    @PatchMapping("/records/{recordId}/{diaryId}")
+    @PatchMapping("/records/{recordId}")
     @Operation(summary = "일기 수정")
     public ApiResponse<DiaryResponse> updateDiary(
             @PathVariable Long recordId,
-            @PathVariable Long diaryId,
             @Valid @RequestBody DiaryUpdateRequest request
     ) {
         Long userId = SecurityUtils.getCurrentUserId();
-        return ApiResponse.success(diaryService.updateDiary(userId, recordId, diaryId, request));
+        return ApiResponse.success(diaryService.updateDiary(userId, recordId, request));
     }
 
-    @DeleteMapping("/records/{recordId}/{diaryId}")
+    @DeleteMapping("/records/{recordId}")
     @Operation(summary = "일기 삭제")
     public ApiResponse<Void> deleteDiary(
-            @PathVariable Long recordId,
-            @PathVariable Long diaryId
+            @PathVariable Long recordId
     ) {
         Long userId = SecurityUtils.getCurrentUserId();
-        diaryService.deleteDiary(userId, recordId, diaryId);
+        diaryService.deleteDiary(userId, recordId);
         return ApiResponse.success(null);
+    }
+
+    @GetMapping
+    @Operation(summary = "내 일기 목록 조회")
+    public ApiResponse<Page<DiaryResponse>> getMyDiaries(
+            @PageableDefault(size = 10, sort = "record.recordDate", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        return ApiResponse.success(diaryService.getMyDiaries(userId, pageable));
     }
 }

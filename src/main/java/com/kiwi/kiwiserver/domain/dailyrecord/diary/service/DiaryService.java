@@ -12,11 +12,10 @@ import com.kiwi.kiwiserver.domain.dailyrecord.record.exception.RecordErrorCode;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.repository.RecordRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.OffsetDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +30,10 @@ public class DiaryService {
     public DiaryResponse createDiary(Long userId, DiaryCreateRequest request) {
         Record record = getOwnedRecord(userId, request.recordId());
 
+        if (diaryRepository.existsByRecord_RecordId(record.getRecordId())) {
+            throw new BusinessException(DiaryErrorCode.DIARY_ALREADY_EXISTS);
+        }
+
         Diary diary = Diary.builder()
                 .record(record)
                 .title(request.title())
@@ -41,29 +44,25 @@ public class DiaryService {
         return diaryMapper.toResponse(savedDiary);
     }
 
-    public List<DiaryResponse> getDiaries(Long userId, Long recordId) {
+    public DiaryResponse getDiaryByRecord(Long userId, Long recordId) {
         getOwnedRecord(userId, recordId);
 
-        return diaryRepository.findAllByRecord_RecordIdAndIsDeletedFalseOrderByCreatedAtAsc(recordId)
-                .stream()
-                .map(diaryMapper::toResponse)
-                .toList();
-    }
-
-    public DiaryResponse getDiary(Long userId, Long recordId, Long diaryId) {
-        getOwnedRecord(userId, recordId);
-
-        Diary diary = diaryRepository.findByDiaryIdAndRecord_RecordIdAndIsDeletedFalse(diaryId, recordId)
+        Diary diary = diaryRepository.findByRecord_RecordId(recordId)
                 .orElseThrow(() -> new BusinessException(DiaryErrorCode.DIARY_NOT_FOUND));
 
         return diaryMapper.toResponse(diary);
     }
 
+    public Page<DiaryResponse> getMyDiaries(Long userId, Pageable pageable) {
+        return diaryRepository.findAllByRecord_User_UserId(userId, pageable)
+                .map(diaryMapper::toResponse);
+    }
+
     @Transactional
-    public DiaryResponse updateDiary(Long userId, Long recordId, Long diaryId, DiaryUpdateRequest request) {
+    public DiaryResponse updateDiary(Long userId, Long recordId, DiaryUpdateRequest request) {
         getOwnedRecord(userId, recordId);
 
-        Diary diary = diaryRepository.findByDiaryIdAndRecord_RecordIdAndIsDeletedFalse(diaryId, recordId)
+        Diary diary = diaryRepository.findByRecord_RecordId(recordId)
                 .orElseThrow(() -> new BusinessException(DiaryErrorCode.DIARY_NOT_FOUND));
 
         diary.update(request.title(), request.content());
@@ -72,13 +71,13 @@ public class DiaryService {
     }
 
     @Transactional
-    public void deleteDiary(Long userId, Long recordId, Long diaryId) {
+    public void deleteDiary(Long userId, Long recordId) {
         getOwnedRecord(userId, recordId);
 
-        Diary diary = diaryRepository.findByDiaryIdAndRecord_RecordIdAndIsDeletedFalse(diaryId, recordId)
+        Diary diary = diaryRepository.findByRecord_RecordId(recordId)
                 .orElseThrow(() -> new BusinessException(DiaryErrorCode.DIARY_NOT_FOUND));
 
-        diary.softDelete();
+        diaryRepository.delete(diary);
     }
 
     private Record getOwnedRecord(Long userId, Long recordId) {

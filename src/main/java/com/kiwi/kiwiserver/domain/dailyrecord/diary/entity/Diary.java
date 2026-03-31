@@ -20,15 +20,16 @@ public class Diary {
     @Column(name = "diary_id")
     private Long diaryId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "record_id",
             nullable = false,
+            unique = true,
             foreignKey = @ForeignKey(name = "fk_diaries_record")
     )
     private Record record;
 
-    @Column(name = "title", length = 100)
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
@@ -40,27 +41,15 @@ public class Diary {
     @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime updatedAt;
 
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted;
-
-    @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
-
     @Builder
     private Diary(Record record, String title, String content) {
         this.record = record;
         this.title = title;
         this.content = content;
-        this.isDeleted = false;
     }
 
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
-    }
-
-    public void softDelete() {
-        this.isDeleted = true;
-        this.deletedAt = OffsetDateTime.now();
     }
 }
