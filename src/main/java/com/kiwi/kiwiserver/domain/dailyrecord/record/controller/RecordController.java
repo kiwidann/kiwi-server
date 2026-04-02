@@ -3,7 +3,9 @@ package com.kiwi.kiwiserver.domain.dailyrecord.record.controller;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.dto.request.RecordCreateRequest;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.dto.request.RecordUpdateRequest;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.dto.response.MonthlyRecordResponse;
+import com.kiwi.kiwiserver.domain.dailyrecord.record.dto.response.RecordDetailResponse;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.dto.response.RecordResponse;
+import com.kiwi.kiwiserver.domain.dailyrecord.record.service.RecordDetailService;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.service.RecordService;
 import com.kiwi.kiwiserver.global.response.ApiResponse;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
@@ -24,6 +26,7 @@ import java.time.LocalDate;
 public class RecordController {
 
     private final RecordService recordService;
+    private final RecordDetailService recordDetailService;
 
     @PostMapping
     @Operation(summary = "하루 기록 생성")
@@ -63,5 +66,14 @@ public class RecordController {
     ) {
         Long userId = SecurityUtils.getCurrentUserId();
         return ApiResponse.success(recordService.updateMoodScore(userId, recordDate, request));
+    }
+
+    @GetMapping("/detail/{recordId}")
+    @Operation(summary = "하루 기록 상세 조회")
+    public ApiResponse<RecordDetailResponse> getRecordDetail(
+            @PathVariable Long recordId
+    ) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        return ApiResponse.success(recordDetailService.getRecordDetail(userId, recordId));
     }
 }
