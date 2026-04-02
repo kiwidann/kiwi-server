@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.identity.account.service;
 
+import com.kiwi.kiwiserver.domain.dailyrecord.keyword.service.DefaultKeywordInitializer;
 import com.kiwi.kiwiserver.domain.identity.account.dto.request.*;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.LoginResponse;
 import com.kiwi.kiwiserver.domain.identity.account.dto.response.RefreshTokenResponse;
@@ -42,6 +43,7 @@ public class AccountService {
     private final EmailVerificationService emailVerificationService;
     private final MailService mailService;
     private final PasswordResetService passwordResetService;
+    private final DefaultKeywordInitializer defaultKeywordInitializer;
 
     @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
@@ -56,6 +58,8 @@ public class AccountService {
 
         User user = userMapper.toEntity(request, savedAccount);
         User savedUser = userRepository.save(user);
+
+        defaultKeywordInitializer.initialize(savedUser);
 
         return signUpMapper.toResponse(savedAccount, savedUser);
     }
