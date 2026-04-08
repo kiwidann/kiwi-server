@@ -1,6 +1,7 @@
 package com.kiwi.kiwiserver.domain.identity.user.service;
 
 import com.kiwi.kiwiserver.domain.identity.user.dto.request.UpdateNicknameRequest;
+import com.kiwi.kiwiserver.domain.item.exception.ItemErrorCode;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
 import com.kiwi.kiwiserver.domain.identity.user.dto.response.UserResponse;
@@ -40,5 +41,13 @@ public class UserService {
         user.updateNickname(request.getNickname());
 
         return userMapper.toResponse(user);
+    }
+
+    private void decreaseKiwiBalance(User user, int amount) {
+        if (user.getKiwiBalance() < amount) {
+            throw new BusinessException(ItemErrorCode.INSUFFICIENT_KIWI_BALANCE);
+        }
+
+        user.updateKiwiBalance(user.getKiwiBalance() - amount);
     }
 }

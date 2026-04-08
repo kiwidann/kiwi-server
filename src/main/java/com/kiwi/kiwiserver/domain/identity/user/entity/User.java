@@ -1,6 +1,8 @@
 package com.kiwi.kiwiserver.domain.identity.user.entity;
 
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
+import com.kiwi.kiwiserver.domain.item.exception.ItemErrorCode;
+import com.kiwi.kiwiserver.global.exception.BusinessException;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import lombok.AccessLevel;
@@ -70,5 +72,9 @@ public class User {
 
     public void updateKiwiBalance(Integer kiwiBalance) {
         this.kiwiBalance = kiwiBalance;
+    }
+
+    public void decreaseKiwiBalance(int amount) {
+        this.kiwiBalance -= amount;
     }
 }
