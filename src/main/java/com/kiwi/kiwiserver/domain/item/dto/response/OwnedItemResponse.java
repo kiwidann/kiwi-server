@@ -11,6 +11,7 @@ public record OwnedItemResponse(
         String description,
         String imageUrl,
         int price,
-        OffsetDateTime acquiredAt
+        OffsetDateTime acquiredAt,
+        boolean equipped
 ) {
 }

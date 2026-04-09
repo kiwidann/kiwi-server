@@ -1,16 +1,21 @@
 package com.kiwi.kiwiserver.domain.item.service;
 
 import com.kiwi.kiwiserver.domain.item.dto.response.OwnedItemResponse;
+import com.kiwi.kiwiserver.domain.item.entity.UserItem;
 import com.kiwi.kiwiserver.domain.item.exception.ItemErrorCode;
 import com.kiwi.kiwiserver.domain.item.mapper.ItemMapper;
 import com.kiwi.kiwiserver.domain.item.repository.ItemCategoryRepository;
+import com.kiwi.kiwiserver.domain.item.repository.UserEquippedItemRepository;
 import com.kiwi.kiwiserver.domain.item.repository.UserItemRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,24 +23,30 @@ import java.util.List;
 public class UserItemService {
 
     private final UserItemRepository userItemRepository;
+    private final UserEquippedItemRepository userEquippedItemRepository;
     private final ItemCategoryRepository itemCategoryRepository;
     private final ItemMapper itemMapper;
 
-    public List<OwnedItemResponse> getOwnedItems(Long userId, Long categoryId) {
+    public Page<OwnedItemResponse> getOwnedItems(Long userId, Long categoryId, Pageable pageable) {
+        Page<UserItem> userItems;
+
         if (categoryId == null) {
-            return userItemRepository.findAllByUser_UserIdAndIsOwnedTrueOrderByUserItemIdAsc(userId)
-                    .stream()
-                    .map(itemMapper::toOwnedItemResponse)
-                    .toList();
+            userItems = userItemRepository.findAllByUser_UserIdAndIsOwnedTrue(userId, pageable);
+        } else {
+            validateCategoryExists(categoryId);
+            userItems = userItemRepository
+                    .findAllByUser_UserIdAndItem_ItemCategory_ItemCategoryIdAndIsOwnedTrue(userId, categoryId, pageable);
         }
 
-        validateCategoryExists(categoryId);
-
-        return userItemRepository
-                .findAllByUser_UserIdAndItem_ItemCategory_ItemCategoryIdAndIsOwnedTrueOrderByUserItemIdAsc(userId, categoryId)
+        Set<Long> equippedItemIds = userEquippedItemRepository.findAllByUser_UserId(userId)
                 .stream()
-                .map(itemMapper::toOwnedItemResponse)
-                .toList();
+                .map(userEquippedItem -> userEquippedItem.getItem().getItemId())
+                .collect(Collectors.toSet());
+
+        return userItems.map(userItem -> itemMapper.toOwnedItemResponse(
+                userItem,
+                equippedItemIds.contains(userItem.getItem().getItemId())
+        ));
     }
 
     private void validateCategoryExists(Long categoryId) {

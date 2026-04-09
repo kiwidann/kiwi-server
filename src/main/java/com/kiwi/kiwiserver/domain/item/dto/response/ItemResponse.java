@@ -8,6 +8,8 @@ public record ItemResponse(
         String description,
         String imageUrl,
         int price,
-        boolean isActive
+        boolean isActive,
+        boolean owned,
+        boolean equipped
 ) {
 }
