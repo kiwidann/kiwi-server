@@ -12,4 +12,8 @@ public interface UserItemRepository extends JpaRepository<UserItem, Long> {
 
     // 특정 유저의 보유 아이템 목록 조회
     List<UserItem> findAllByUser_UserIdAndIsOwnedTrueOrderByUserItemIdAsc(Long userId);
+
+    List<UserItem> findAllByUser_UserIdAndItem_ItemCategory_ItemCategoryIdAndIsOwnedTrueOrderByUserItemIdAsc(
+            Long userId, Long categoryId
+    );
 }
