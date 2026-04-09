@@ -24,10 +24,11 @@ public class ItemController {
     @GetMapping
     public ApiResponse<Page<ItemResponse>> getItems(
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false, defaultValue = "false") boolean excludeOwned,
             @PageableDefault(sort = "price", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         Long userId = SecurityUtils.getCurrentUserId();
-        return ApiResponse.success(itemService.getItems(userId, categoryId, pageable));
+        return ApiResponse.success(itemService.getItems(userId, categoryId, excludeOwned, pageable));
     }
 
     @Operation(summary = "아이템 구매")

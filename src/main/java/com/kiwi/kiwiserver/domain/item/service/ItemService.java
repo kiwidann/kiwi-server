@@ -22,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,16 +41,7 @@ public class ItemService {
     private final ItemMapper itemMapper;
 
     @Transactional(readOnly = true)
-    public Page<ItemResponse> getItems(Long userId, Long categoryId, Pageable pageable) {
-        Page<Item> items;
-
-        if (categoryId == null) {
-            items = itemRepository.findAllByIsActiveTrue(pageable);
-        } else {
-            validateCategoryExists(categoryId);
-            items = itemRepository.findAllByItemCategory_ItemCategoryIdAndIsActiveTrue(categoryId, pageable);
-        }
-
+    public Page<ItemResponse> getItems(Long userId, Long categoryId, boolean excludeOwned, Pageable pageable) {
         Set<Long> ownedItemIds = userItemRepository.findAllByUser_UserIdAndIsOwnedTrue(userId)
                 .stream()
                 .map(userItem -> userItem.getItem().getItemId())
@@ -58,6 +51,28 @@ public class ItemService {
                 .stream()
                 .map(userEquippedItem -> userEquippedItem.getItem().getItemId())
                 .collect(Collectors.toSet());
+
+        Page<Item> items;
+
+        if (excludeOwned && !ownedItemIds.isEmpty()) {
+            List<Long> ownedItemIdList = new ArrayList<>(ownedItemIds);
+
+            if (categoryId == null) {
+                items = itemRepository.findAllByIsActiveTrueAndItemIdNotIn(ownedItemIdList, pageable);
+            } else {
+                validateCategoryExists(categoryId);
+                items = itemRepository.findAllByItemCategory_ItemCategoryIdAndIsActiveTrueAndItemIdNotIn(
+                        categoryId, ownedItemIdList, pageable
+                );
+            }
+        } else {
+            if (categoryId == null) {
+                items = itemRepository.findAllByIsActiveTrue(pageable);
+            } else {
+                validateCategoryExists(categoryId);
+                items = itemRepository.findAllByItemCategory_ItemCategoryIdAndIsActiveTrue(categoryId, pageable);
+            }
+        }
 
         return items.map(item -> itemMapper.toItemResponse(
                 item,
