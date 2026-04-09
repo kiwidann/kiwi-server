@@ -20,7 +20,7 @@ public class ItemMapper {
         );
     }
 
-    public ItemResponse toItemResponse(Item item) {
+    public ItemResponse toItemResponse(Item item, boolean owned, boolean equipped) {
         return new ItemResponse(
                 item.getItemId(),
                 item.getItemCategory().getItemCategoryId(),
@@ -29,11 +29,13 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getImageUrl(),
                 item.getPrice(),
-                item.isActive()
+                item.isActive(),
+                owned,
+                equipped
         );
     }
 
-    public OwnedItemResponse toOwnedItemResponse(UserItem userItem) {
+    public OwnedItemResponse toOwnedItemResponse(UserItem userItem, boolean equipped) {
         Item item = userItem.getItem();
 
         return new OwnedItemResponse(
@@ -45,7 +47,8 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getImageUrl(),
                 item.getPrice(),
-                userItem.getAcquiredAt()
+                userItem.getAcquiredAt(),
+                equipped
         );
     }
 

@@ -7,9 +7,11 @@ import com.kiwi.kiwiserver.global.response.ApiResponse;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,10 +22,12 @@ public class ItemController {
 
     @Operation(summary = "아이템 목록 조회")
     @GetMapping
-    public ApiResponse<List<ItemResponse>> getItems(
-            @RequestParam(required = false) Long categoryId
+    public ApiResponse<Page<ItemResponse>> getItems(
+            @RequestParam(required = false) Long categoryId,
+            @PageableDefault(sort = "price", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ApiResponse.success(itemService.getItems(categoryId));
+        Long userId = SecurityUtils.getCurrentUserId();
+        return ApiResponse.success(itemService.getItems(userId, categoryId, pageable));
     }
 
     @Operation(summary = "아이템 구매")
