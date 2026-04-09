@@ -12,6 +12,9 @@ import com.kiwi.kiwiserver.domain.item.mapper.ItemMapper;
 import com.kiwi.kiwiserver.domain.item.repository.ItemCategoryRepository;
 import com.kiwi.kiwiserver.domain.item.repository.ItemRepository;
 import com.kiwi.kiwiserver.domain.item.repository.UserItemRepository;
+import com.kiwi.kiwiserver.domain.kiwitransaction.entity.KiwiTransaction;
+import com.kiwi.kiwiserver.domain.kiwitransaction.entity.KiwiTxType;
+import com.kiwi.kiwiserver.domain.kiwitransaction.repository.KiwiTransactionRepository;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class ItemService {
     private final ItemCategoryRepository itemCategoryRepository;
     private final UserItemRepository userItemRepository;
     private final UserRepository userRepository;
+    private final KiwiTransactionRepository kiwiTransactionRepository;
     private final ItemMapper itemMapper;
 
     @Transactional(readOnly = true)
@@ -55,6 +59,10 @@ public class ItemService {
 
         user.decreaseKiwiBalance(item.getPrice());
         userItemRepository.save(UserItem.create(user, item));
+
+        kiwiTransactionRepository.save(
+                KiwiTransaction.create(user, -item.getPrice(), KiwiTxType.PURCHASE_ITEM)
+        );
 
         return new PurchaseItemResponse(
                 item.getItemId(),
