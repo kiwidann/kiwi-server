@@ -4,6 +4,7 @@ import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.response.CbtSessionSummary
 import com.kiwi.kiwiserver.domain.dailyrecord.diary.dto.response.DiaryResponse;
 import com.kiwi.kiwiserver.domain.dailyrecord.keyword.dto.response.KeywordResponse;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -12,8 +13,8 @@ public record RecordDetailResponse(
         Long recordId,
         LocalDate recordDate,
         Integer moodScore,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt,
+        Instant createdAt,
+        Instant updatedAt,
         DiaryResponse diary,
         List<KeywordResponse> keywords,
         List<CbtSessionSummaryResponse> cbtSessions
