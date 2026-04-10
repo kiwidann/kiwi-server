@@ -71,17 +71,17 @@ public class AccountService {
 
         // 탈퇴한 계정은 인증 메일 발송 불가
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         // 이미 인증된 계정은 재인증 불필요
         if (Boolean.TRUE.equals(account.getIsVerified())) {
-            throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_ALREADY_VERIFIED);
         }
 
         // 일정 시간 내 인증 코드 발송 횟수 초과 여부 확인
         if (emailVerificationService.isSendCountExceeded(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_SENDS);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_TOO_MANY_VERIFICATION_SENDS);
         }
 
         // 재전송 제한이 남아 있으면 남은 시간을 함께 반환
@@ -104,29 +104,29 @@ public class AccountService {
 
         // 탈퇴한 계정은 인증 처리 불가
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         // 이미 인증된 계정은 다시 인증할 필요 없음
         if (Boolean.TRUE.equals(account.getIsVerified())) {
-            throw new BusinessException(AccountErrorCode.ALREADY_VERIFIED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_ALREADY_VERIFIED);
         }
 
         // Redis에 인증 코드가 없으면 만료되었거나 발급되지 않은 상태
         String savedCode = emailVerificationService.findCode(account.getEmail());
         if (savedCode == null) {
-            throw new BusinessException(AccountErrorCode.VERIFICATION_CODE_NOT_FOUND);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_VERIFICATION_CODE_NOT_FOUND);
         }
 
         // brute-force 방지를 위해 시도 횟수 초과 여부 확인
         if (emailVerificationService.isAttemptExceeded(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_ATTEMPTS);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_TOO_MANY_VERIFICATION_ATTEMPTS);
         }
 
         // 인증 코드가 틀리면 실패 횟수 증가
         if (!emailVerificationService.matches(account.getEmail(), request.getCode())) {
             emailVerificationService.increaseAttempt(account.getEmail());
-            throw new BusinessException(AccountErrorCode.INVALID_VERIFICATION_CODE);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_VERIFICATION_CODE);
         }
 
         // 인증 완료 처리
@@ -139,21 +139,21 @@ public class AccountService {
     public LoginResponse login(LoginRequest request) {
         // 이메일에 해당하는 계정이 없는 경우
         Account account = accountRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BusinessException(AccountErrorCode.INVALID_CREDENTIALS));
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_INVALID_CREDENTIALS));
 
         // 탈퇴한 계정인 경우
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         // 이메일 인증이 완료되지 않은 경우
         if (!Boolean.TRUE.equals(account.getIsVerified())) {
-            throw new BusinessException(AccountErrorCode.EMAIL_NOT_VERIFIED);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_EMAIL_NOT_VERIFIED);
         }
 
         // 비밀번호가 일치하지 않은 경우
         if (!passwordEncoder.matches(request.getPassword(), account.getPasswordHash())) {
-            throw new BusinessException(AccountErrorCode.INVALID_CREDENTIALS);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_CREDENTIALS);
         }
 
         // 계정에 연결된 사용자 정보가 없는 경우
@@ -193,7 +193,7 @@ public class AccountService {
 
         // 요청으로 들어온 refresh token의 유효성 검증
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new BusinessException(AccountErrorCode.INVALID_REFRESH_TOKEN);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_REFRESH_TOKEN);
         }
 
         // refresh token에서 accountId 추출
@@ -201,7 +201,7 @@ public class AccountService {
 
         // Redis에 저장된 refresh token과 일치하는지 확인
         if (!refreshTokenService.matches(accountId, refreshToken)) {
-            throw new BusinessException(AccountErrorCode.INVALID_REFRESH_TOKEN);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_REFRESH_TOKEN);
         }
 
         // account 테이블에 존재하는 계정인지 확인
@@ -210,7 +210,7 @@ public class AccountService {
 
         // 탈퇴한 계정인지 확인
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         // 계정에 연결된 사용자 정보가 있는지 확인
@@ -245,11 +245,11 @@ public class AccountService {
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.ALREADY_DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_ALREADY_DELETED);
         }
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPasswordHash())) {
-            throw new BusinessException(AccountErrorCode.INVALID_PASSWORD);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_PASSWORD);
         }
 
         account.softDelete(OffsetDateTime.now());
@@ -263,17 +263,17 @@ public class AccountService {
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         // 현재 비밀번호 일치 여부 확인
         if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPasswordHash())) {
-            throw new BusinessException(AccountErrorCode.INVALID_PASSWORD);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_PASSWORD);
         }
 
         // 새 비밀번호가 현재 비밀번호와 같은지 확인
         if (passwordEncoder.matches(request.getNewPassword(), account.getPasswordHash())) {
-            throw new BusinessException(AccountErrorCode.PASSWORD_SAME_AS_OLD);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_PASSWORD_SAME_AS_OLD);
         }
 
         // 새 비밀번호 해시 처리 후 저장
@@ -291,16 +291,16 @@ public class AccountService {
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         if (!Boolean.TRUE.equals(account.getIsVerified())) {
-            throw new BusinessException(AccountErrorCode.EMAIL_NOT_VERIFIED);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_EMAIL_NOT_VERIFIED);
         }
 
         // 일정 시간 내 인증 코드 발송 횟수 초과 여부 확인
         if (emailVerificationService.isSendCountExceeded(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_SENDS);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_TOO_MANY_VERIFICATION_SENDS);
         }
 
         // 재전송 제한이 남아 있으면 남은 시간을 함께 반환
@@ -323,23 +323,23 @@ public class AccountService {
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         String savedCode = emailVerificationService.findCode(account.getEmail());
         if (savedCode == null) {
-            throw new BusinessException(AccountErrorCode.VERIFICATION_CODE_NOT_FOUND);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_VERIFICATION_CODE_NOT_FOUND);
         }
 
         // brute-force 방지를 위해 시도 횟수 초과 여부 확인
         if (emailVerificationService.isAttemptExceeded(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.TOO_MANY_VERIFICATION_ATTEMPTS);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_TOO_MANY_VERIFICATION_ATTEMPTS);
         }
 
         // 인증 코드가 틀리면 실패 횟수 증가
         if (!emailVerificationService.matches(account.getEmail(), request.getCode())) {
             emailVerificationService.increaseAttempt(account.getEmail());
-            throw new BusinessException(AccountErrorCode.INVALID_VERIFICATION_CODE);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_INVALID_VERIFICATION_CODE);
         }
 
         // 비밀번호 재설정 가능 상태 부여
@@ -356,17 +356,17 @@ public class AccountService {
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
         if (Boolean.TRUE.equals(account.getIsDeleted())) {
-            throw new BusinessException(AccountErrorCode.DELETED_ACCOUNT);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_DELETED);
         }
 
         // 재설정 인증 완료 상태인지 확인
         if (!passwordResetService.isResetAllowed(account.getEmail())) {
-            throw new BusinessException(AccountErrorCode.RESET_PASSWORD_NOT_ALLOWED);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_VERIFICATION_REQUIRED_FOR_PASSWORD_RESET);
         }
 
         // 기존 비밀번호와 동일한지 확인
         if (passwordEncoder.matches(request.getNewPassword(), account.getPasswordHash())) {
-            throw new BusinessException(AccountErrorCode.PASSWORD_SAME_AS_OLD);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_PASSWORD_SAME_AS_OLD);
         }
 
         // 새 비밀번호 해시 후 저장
@@ -382,7 +382,7 @@ public class AccountService {
 
     private void validateDuplicateEmail(String email) {
         if (accountRepository.existsByEmail(email)) {
-            throw new BusinessException(AccountErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new BusinessException(AccountErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
         }
     }
 }

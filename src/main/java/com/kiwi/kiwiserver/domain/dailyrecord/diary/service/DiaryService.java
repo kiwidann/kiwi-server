@@ -85,7 +85,7 @@ public class DiaryService {
                 .orElseThrow(() -> new BusinessException(RecordErrorCode.RECORD_NOT_FOUND));
 
         if (!record.getUser().getUserId().equals(userId)) {
-            throw new BusinessException(DiaryErrorCode.RECORD_NOT_OWNED);
+            throw new BusinessException(DiaryErrorCode.DIARY_RECORD_NOT_OWNED);
         }
 
         return record;

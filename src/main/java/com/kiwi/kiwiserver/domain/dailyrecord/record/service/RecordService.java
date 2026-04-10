@@ -89,11 +89,11 @@ public class RecordService {
         LocalDate today = LocalDate.now();
 
         if (recordDate.isAfter(today)) {
-            throw new BusinessException(RecordErrorCode.INVALID_RECORD_DATE);
+            throw new BusinessException(RecordErrorCode.RECORD_INVALID_DATE);
         }
 
         if (recordDate.isBefore(today.minusDays(1))) {
-            throw new BusinessException(RecordErrorCode.INVALID_RECORD_DATE);
+            throw new BusinessException(RecordErrorCode.RECORD_INVALID_DATE);
         }
     }
 

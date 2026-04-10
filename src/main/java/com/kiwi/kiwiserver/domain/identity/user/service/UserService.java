@@ -45,7 +45,7 @@ public class UserService {
 
     private void decreaseKiwiBalance(User user, int amount) {
         if (user.getKiwiBalance() < amount) {
-            throw new BusinessException(ItemErrorCode.INSUFFICIENT_KIWI_BALANCE);
+            throw new BusinessException(ItemErrorCode.ITEM_INSUFFICIENT_KIWI_BALANCE);
         }
 
         user.updateKiwiBalance(user.getKiwiBalance() - amount);
