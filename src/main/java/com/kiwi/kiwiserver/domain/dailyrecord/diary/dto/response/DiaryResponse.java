@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.diary.dto.response;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 public record DiaryResponse(
@@ -7,7 +8,7 @@ public record DiaryResponse(
         Long recordId,
         String title,
         String content,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
