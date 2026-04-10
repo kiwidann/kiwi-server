@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.item.entity;
 
+import com.kiwi.kiwiserver.global.entity.CreatedAtEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,7 +13,7 @@ import java.time.OffsetDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "item_categories")
-public class ItemCategory {
+public class ItemCategory extends CreatedAtEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,12 +23,8 @@ public class ItemCategory {
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
     @Builder
     public ItemCategory(String name, OffsetDateTime createdAt) {
         this.name = name;
-        this.createdAt = createdAt;
     }
 }

@@ -1,6 +1,7 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.record.entity;
 
 import com.kiwi.kiwiserver.domain.identity.user.entity.User;
+import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.time.OffsetDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Record {
+public class Record extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,12 +36,6 @@ public class Record {
 
     @Column(name = "mood_score", nullable = false)
     private Integer moodScore;
-
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime updatedAt;
 
     @Builder
     private Record(User user, LocalDate recordDate, Integer moodScore) {

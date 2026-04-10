@@ -1,6 +1,7 @@
 package com.kiwi.kiwiserver.domain.kiwitransaction.entity;
 
 import com.kiwi.kiwiserver.domain.identity.user.entity.User;
+import com.kiwi.kiwiserver.global.entity.CreatedAtEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.time.OffsetDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "kiwi_transactions")
-public class KiwiTransaction {
+public class KiwiTransaction extends CreatedAtEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,15 +35,11 @@ public class KiwiTransaction {
     @Column(name = "type", nullable = false, columnDefinition = "kiwi_tx_type")
     private KiwiTxType type;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
     @Builder
     public KiwiTransaction(User user, int amount, KiwiTxType type, OffsetDateTime createdAt) {
         this.user = user;
         this.amount = amount;
         this.type = type;
-        this.createdAt = createdAt;
     }
 
     public static KiwiTransaction create(User user, int amount, KiwiTxType type) {
@@ -50,7 +47,6 @@ public class KiwiTransaction {
                 .user(user)
                 .amount(amount)
                 .type(type)
-                .createdAt(OffsetDateTime.now())
                 .build();
     }
 }

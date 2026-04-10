@@ -2,6 +2,7 @@ package com.kiwi.kiwiserver.domain.identity.user.entity;
 
 import com.kiwi.kiwiserver.domain.identity.account.entity.Account;
 import com.kiwi.kiwiserver.domain.item.exception.ItemErrorCode;
+import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
 import com.kiwi.kiwiserver.global.exception.BusinessException;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,12 +34,6 @@ public class User {
 
     @Column(name = "kiwi_balance", nullable = false)
     private Integer kiwiBalance;
-
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime updatedAt;
 
     @Builder
     private User(
