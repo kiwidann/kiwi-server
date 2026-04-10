@@ -74,7 +74,7 @@ public class KeywordService {
         String normalized = name == null ? null : name.trim();
 
         if (normalized == null || normalized.isBlank()) {
-            throw new BusinessException(KeywordErrorCode.INVALID_KEYWORD_REQUEST);
+            throw new BusinessException(KeywordErrorCode.KEYWORD_INVALID_REQUEST);
         }
 
         return normalized;
