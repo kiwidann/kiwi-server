@@ -98,7 +98,7 @@ public class RecordKeywordService {
                 .orElseThrow(() -> new BusinessException(RecordErrorCode.RECORD_NOT_FOUND));
 
         if (!record.getUser().getUserId().equals(userId)) {
-            throw new BusinessException(KeywordErrorCode.RECORD_NOT_OWNED);
+            throw new BusinessException(KeywordErrorCode.KEYWORD_RECORD_NOT_OWNED);
         }
 
         return record;
