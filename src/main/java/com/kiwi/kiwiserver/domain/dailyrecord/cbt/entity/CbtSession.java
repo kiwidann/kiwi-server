@@ -1,6 +1,7 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
 
 import com.kiwi.kiwiserver.domain.dailyrecord.record.entity.Record;
+import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import java.time.OffsetDateTime;
 @Table(name = "cbt_sessions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CbtSession {
+public class CbtSession extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,12 +42,6 @@ public class CbtSession {
 
     @Column(name = "after_emotion_score")
     private Integer afterEmotionScore;
-
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime updatedAt;
 
     @Builder
     private CbtSession(Record record, Tag tag, Integer beforeEmotionScore, Integer afterEmotionScore) {

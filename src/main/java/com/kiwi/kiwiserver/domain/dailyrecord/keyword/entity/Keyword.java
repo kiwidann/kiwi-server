@@ -1,6 +1,7 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.keyword.entity;
 
 import com.kiwi.kiwiserver.domain.identity.user.entity.User;
+import com.kiwi.kiwiserver.global.entity.CreatedAtEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.time.OffsetDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Keyword {
+public class Keyword extends CreatedAtEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +36,6 @@ public class Keyword {
 
     @Column(name = "name", nullable = false, length = 50)
     private String name;
-
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
 
     @Builder
     private Keyword(User user, String name) {
