@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
 
+import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.time.OffsetDateTime;
 @Table(name = "cbt_answers")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CbtAnswer {
+public class CbtAnswer extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,12 +37,6 @@ public class CbtAnswer {
 
     @Column(name = "answer_text")
     private String answerText;
-
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
-    private OffsetDateTime updatedAt;
 
     public CbtAnswer(CbtSession cbtSession, CbtQuestion question, String answerText) {
         this.cbtSession = cbtSession;

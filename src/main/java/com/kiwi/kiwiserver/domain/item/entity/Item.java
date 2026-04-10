@@ -1,5 +1,6 @@
 package com.kiwi.kiwiserver.domain.item.entity;
 
+import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,7 +13,7 @@ import java.time.OffsetDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "items")
-public class Item {
+public class Item extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,12 +39,6 @@ public class Item {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
     @Builder
     public Item(
             ItemCategory itemCategory,
@@ -51,9 +46,7 @@ public class Item {
             String description,
             String imageUrl,
             int price,
-            boolean isActive,
-            OffsetDateTime createdAt,
-            OffsetDateTime updatedAt
+            boolean isActive
     ) {
         this.itemCategory = itemCategory;
         this.name = name;
@@ -61,8 +54,6 @@ public class Item {
         this.imageUrl = imageUrl;
         this.price = price;
         this.isActive = isActive;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public void updateItem(
