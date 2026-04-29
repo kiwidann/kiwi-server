@@ -1,4 +1,4 @@
-package com.kiwi.kiwiserver.domain.report.dto.response;
+package com.kiwi.kiwiserver.domain.report.report.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

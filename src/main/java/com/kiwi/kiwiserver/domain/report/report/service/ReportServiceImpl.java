@@ -1,10 +1,10 @@
-package com.kiwi.kiwiserver.domain.report.service;
+package com.kiwi.kiwiserver.domain.report.report.service;
 
-import com.kiwi.kiwiserver.domain.report.dto.response.CbtReportResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.EmotionTrendResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.KeywordReportResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.ReportDashboardResponse;
-import com.kiwi.kiwiserver.domain.report.repository.ReportQueryRepository;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ReportDashboardResponse;
+import com.kiwi.kiwiserver.domain.report.report.repository.ReportQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

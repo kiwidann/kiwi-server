@@ -1,9 +1,9 @@
-package com.kiwi.kiwiserver.domain.report.repository;
+package com.kiwi.kiwiserver.domain.report.report.repository;
 
-import com.kiwi.kiwiserver.domain.report.dto.response.CbtSessionStatResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.CbtTagStatResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.EmotionTrendPointResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.KeywordStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtSessionStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtTagStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendPointResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordStatResponse;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

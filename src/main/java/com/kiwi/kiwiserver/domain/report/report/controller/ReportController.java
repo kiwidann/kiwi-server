@@ -1,10 +1,10 @@
-package com.kiwi.kiwiserver.domain.report.controller;
+package com.kiwi.kiwiserver.domain.report.report.controller;
 
-import com.kiwi.kiwiserver.domain.report.dto.response.CbtReportResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.EmotionTrendResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.KeywordReportResponse;
-import com.kiwi.kiwiserver.domain.report.dto.response.ReportDashboardResponse;
-import com.kiwi.kiwiserver.domain.report.service.ReportService;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ReportDashboardResponse;
+import com.kiwi.kiwiserver.domain.report.report.service.ReportService;
 import com.kiwi.kiwiserver.global.response.ApiResponse;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
