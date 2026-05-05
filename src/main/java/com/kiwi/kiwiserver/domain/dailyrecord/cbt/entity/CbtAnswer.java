@@ -6,8 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
-
 @Entity
 @Table(name = "cbt_answers")
 @Getter
@@ -38,9 +36,18 @@ public class CbtAnswer extends BaseTimeEntity {
     @Column(name = "answer_text")
     private String answerText;
 
-    public CbtAnswer(CbtSession cbtSession, CbtQuestion question, String answerText) {
+    @Column(name = "answer_value")
+    private Integer answerValue;
+
+    public CbtAnswer(
+            CbtSession cbtSession,
+            CbtQuestion question,
+            String answerText,
+            Integer answerValue
+    ) {
         this.cbtSession = cbtSession;
         this.question = question;
         this.answerText = answerText;
+        this.answerValue = answerValue;
     }
 }

@@ -4,6 +4,7 @@ import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.response.*;
 import com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Component
@@ -19,19 +20,26 @@ public class CbtMapper {
     public CbtQuestionResponse toQuestionResponse(CbtQuestion question) {
         return new CbtQuestionResponse(
                 question.getQuestionId(),
+                question.getToolCode(),
                 question.getCode(),
                 question.getQuestionText(),
                 question.getDisplayOrder(),
+                question.getInputType(),
                 question.isRequired()
         );
     }
 
     public CbtAnswerResponse toAnswerResponse(CbtAnswer answer) {
+        CbtQuestion question = answer.getQuestion();
+
         return new CbtAnswerResponse(
-                answer.getQuestion().getQuestionId(),
-                answer.getQuestion().getCode(),
-                answer.getQuestion().getQuestionText(),
-                answer.getAnswerText()
+                question.getQuestionId(),
+                question.getToolCode(),
+                question.getCode(),
+                question.getQuestionText(),
+                question.getInputType(),
+                answer.getAnswerText(),
+                answer.getAnswerValue()
         );
     }
 
@@ -40,6 +48,7 @@ public class CbtMapper {
                 session.getCbtSessionId(),
                 session.getTag().getTagId(),
                 session.getTag().getName(),
+                session.getToolCode(),
                 session.getBeforeEmotionScore(),
                 session.getAfterEmotionScore(),
                 session.getCreatedAt()
@@ -52,10 +61,12 @@ public class CbtMapper {
                 session.getRecord().getRecordId(),
                 session.getTag().getTagId(),
                 session.getTag().getName(),
+                session.getToolCode(),
                 session.getBeforeEmotionScore(),
                 session.getAfterEmotionScore(),
                 session.getCreatedAt(),
                 answers.stream()
+                        .sorted(Comparator.comparing(answer -> answer.getQuestion().getDisplayOrder()))
                         .map(this::toAnswerResponse)
                         .toList()
         );

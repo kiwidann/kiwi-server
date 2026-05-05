@@ -6,7 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "cbt_questions")
+@Table(
+        name = "cbt_questions",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_cbt_questions_tool_code_code",
+                        columnNames = {"tool_code", "code"}
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CbtQuestion {
@@ -16,7 +24,11 @@ public class CbtQuestion {
     @Column(name = "question_id")
     private Long questionId;
 
-    @Column(name = "code", nullable = false, unique = true, length = 50)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tool_code", nullable = false, length = 50)
+    private ThinkingToolCode toolCode;
+
+    @Column(name = "code", nullable = false, length = 50)
     private String code;
 
     @Column(name = "question_text", nullable = false)
@@ -24,6 +36,10 @@ public class CbtQuestion {
 
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "input_type", nullable = false, length = 30)
+    private QuestionInputType inputType;
 
     @Column(name = "is_required", nullable = false)
     private boolean isRequired;
