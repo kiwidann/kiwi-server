@@ -1,9 +1,6 @@
 package com.kiwi.kiwiserver.domain.report.report.service;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordReportResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.ReportDashboardResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.*;
 import com.kiwi.kiwiserver.domain.report.report.repository.ReportQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,11 +31,14 @@ public class ReportServiceImpl implements ReportService {
         double averageAfterScore = reportQueryRepository.findAverageThinkingToolAfterScore(userId, from, to);
         double averageImprovement = reportQueryRepository.findAverageThinkingToolImprovement(userId, from, to);
 
+        var topThinkingTools = reportQueryRepository.findTopThinkingTools(userId, from, to, 3);
+
         List<String> insights = createInsights(
                 averageEmotionScore,
                 topKeywords.stream().map(k -> k.getKeyword()).toList(),
                 thinkingToolCount,
-                averageImprovement
+                averageImprovement,
+                topThinkingTools
         );
 
         return ReportDashboardResponse.builder()
@@ -53,6 +53,7 @@ public class ReportServiceImpl implements ReportService {
                 .averageThinkingToolBeforeScore(averageBeforeScore)
                 .averageThinkingToolAfterScore(averageAfterScore)
                 .averageThinkingToolImprovement(averageImprovement)
+                .topThinkingTools(topThinkingTools)
                 .insights(insights)
                 .build();
     }
@@ -92,6 +93,7 @@ public class ReportServiceImpl implements ReportService {
         double averageAfterScore = reportQueryRepository.findAverageThinkingToolAfterScore(userId, from, to);
         double averageImprovement = reportQueryRepository.findAverageThinkingToolImprovement(userId, from, to);
 
+        var toolStats = reportQueryRepository.findThinkingToolStats(userId, from, to);
         var tagStats = reportQueryRepository.findThinkingToolTagStats(userId, from, to);
         var sessionStats = reportQueryRepository.findThinkingToolSessionStats(userId, from, to);
 
@@ -102,6 +104,7 @@ public class ReportServiceImpl implements ReportService {
                 .averageBeforeScore(averageBeforeScore)
                 .averageAfterScore(averageAfterScore)
                 .averageImprovement(averageImprovement)
+                .toolStats(toolStats)
                 .tagStats(tagStats)
                 .sessionStats(sessionStats)
                 .build();
@@ -111,7 +114,8 @@ public class ReportServiceImpl implements ReportService {
             double averageEmotionScore,
             List<String> topKeywords,
             long thinkingToolCount,
-            double averageImprovement
+            double averageImprovement,
+            List<ThinkingToolStatResponse> topThinkingTools
     ) {
         List<String> insights = new ArrayList<>();
 
@@ -125,6 +129,10 @@ public class ReportServiceImpl implements ReportService {
 
         if (thinkingToolCount > 0 && averageImprovement > 0) {
             insights.add("생각정리도구 사용 이후 감정 점수가 평균적으로 상승하는 경향이 보여요");
+        }
+
+        if (!topThinkingTools.isEmpty()) {
+            insights.add("최근 가장 많이 사용한 생각정리도구는 '" + topThinkingTools.get(0).getToolName() + "'예요");
         }
 
         if (insights.isEmpty()) {

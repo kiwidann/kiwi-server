@@ -18,6 +18,7 @@ public class ThinkingToolReportResponse {
     private double averageAfterScore;
     private double averageImprovement;
 
+    private List<ThinkingToolStatResponse> toolStats;
     private List<ThinkingToolTagStatResponse> tagStats;
     private List<ThinkingToolSessionStatResponse> sessionStats;
 }

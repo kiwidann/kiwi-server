@@ -1,9 +1,6 @@
 package com.kiwi.kiwiserver.domain.report.report.repository;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendPointResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordStatResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolSessionStatResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolTagStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,4 +30,8 @@ public interface ReportQueryRepository {
     List<ThinkingToolTagStatResponse> findThinkingToolTagStats(Long userId, LocalDate from, LocalDate to);
 
     List<ThinkingToolSessionStatResponse> findThinkingToolSessionStats(Long userId, LocalDate from, LocalDate to);
+
+    List<ThinkingToolStatResponse> findThinkingToolStats(Long userId, LocalDate from, LocalDate to);
+
+    List<ThinkingToolStatResponse> findTopThinkingTools(Long userId, LocalDate from, LocalDate to, int limit);
 }

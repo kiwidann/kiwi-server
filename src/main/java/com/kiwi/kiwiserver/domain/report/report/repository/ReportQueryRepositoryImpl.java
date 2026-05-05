@@ -1,9 +1,6 @@
 package com.kiwi.kiwiserver.domain.report.report.repository;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendPointResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordStatResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolSessionStatResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolTagStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -223,6 +220,47 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
                 .setParameter("userId", userId)
                 .setParameter("from", from)
                 .setParameter("to", to)
+                .getResultList();
+    }
+
+    @Override
+    public List<ThinkingToolStatResponse> findThinkingToolStats(Long userId, LocalDate from, LocalDate to) {
+        return em.createQuery("""
+            select new com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolStatResponse(
+                s.toolCode,
+                count(s),
+                avg(s.afterEmotionScore - s.beforeEmotionScore)
+            )
+            from ThinkingToolSession s
+            where s.record.user.userId = :userId
+              and s.record.recordDate between :from and :to
+            group by s.toolCode
+            order by count(s) desc
+            """, ThinkingToolStatResponse.class)
+                .setParameter("userId", userId)
+                .setParameter("from", from)
+                .setParameter("to", to)
+                .getResultList();
+    }
+
+    @Override
+    public List<ThinkingToolStatResponse> findTopThinkingTools(Long userId, LocalDate from, LocalDate to, int limit) {
+        return em.createQuery("""
+            select new com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolStatResponse(
+                s.toolCode,
+                count(s),
+                avg(s.afterEmotionScore - s.beforeEmotionScore)
+            )
+            from ThinkingToolSession s
+            where s.record.user.userId = :userId
+              and s.record.recordDate between :from and :to
+            group by s.toolCode
+            order by count(s) desc
+            """, ThinkingToolStatResponse.class)
+                .setParameter("userId", userId)
+                .setParameter("from", from)
+                .setParameter("to", to)
+                .setMaxResults(limit)
                 .getResultList();
     }
 }

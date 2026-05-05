@@ -25,5 +25,7 @@ public class ReportDashboardResponse {
     private double averageThinkingToolAfterScore;
     private double averageThinkingToolImprovement;
 
+    private List<ThinkingToolStatResponse> topThinkingTools;
+
     private List<String> insights;
 }
