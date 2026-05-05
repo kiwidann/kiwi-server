@@ -1,11 +1,9 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.record.service;
 
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.response.CbtSessionSummaryResponse;
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity.CbtSession;
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.mapper.CbtMapper;
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.repository.CbtSessionRepository;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.dto.response.ThinkingToolSessionSummaryResponse;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.mapper.ThinkingToolMapper;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.repository.ThinkingToolSessionRepository;
 import com.kiwi.kiwiserver.domain.dailyrecord.diary.dto.response.DiaryResponse;
-import com.kiwi.kiwiserver.domain.dailyrecord.diary.entity.Diary;
 import com.kiwi.kiwiserver.domain.dailyrecord.diary.mapper.DiaryMapper;
 import com.kiwi.kiwiserver.domain.dailyrecord.diary.repository.DiaryRepository;
 import com.kiwi.kiwiserver.domain.dailyrecord.keyword.dto.response.KeywordResponse;
@@ -32,12 +30,12 @@ public class RecordDetailService {
     private final RecordRepository recordRepository;
     private final DiaryRepository diaryRepository;
     private final RecordKeywordRepository recordKeywordRepository;
-    private final CbtSessionRepository cbtSessionRepository;
+    private final ThinkingToolSessionRepository thinkingToolSessionRepository;
 
     private final RecordMapper recordMapper;
     private final DiaryMapper diaryMapper;
     private final KeywordMapper keywordMapper;
-    private final CbtMapper cbtMapper;
+    private final ThinkingToolMapper thinkingToolMapper;
 
     public RecordDetailResponse getRecordDetail(Long userId, Long recordId) {
         Record record = getOwnedRecord(userId, recordId);
@@ -52,17 +50,17 @@ public class RecordDetailService {
                 .map(keywordMapper::toResponse)
                 .toList();
 
-        List<CbtSessionSummaryResponse> cbtSessionResponses = cbtSessionRepository
+        List<ThinkingToolSessionSummaryResponse> thinkingToolSessionResponses = thinkingToolSessionRepository
                 .findAllByRecord_RecordIdOrderByCreatedAtDesc(recordId)
                 .stream()
-                .map(cbtMapper::toSessionSummaryResponse)
+                .map(thinkingToolMapper::toSessionSummaryResponse)
                 .toList();
 
         return recordMapper.toDetailResponse(
                 record,
                 diaryResponse,
                 keywordResponses,
-                cbtSessionResponses
+                thinkingToolSessionResponses
         );
     }
 

@@ -8,7 +8,7 @@ public enum KiwiTxType {
     @Schema(description = "일기 작성 보상")
     EARN_DIARY,
 
-    @Schema(description = "CBT 완료 보상")
+    @Schema(description = "생각정리도구 완료 보상")
     EARN_CBT,
 
     @Schema(description = "아이템 구매")

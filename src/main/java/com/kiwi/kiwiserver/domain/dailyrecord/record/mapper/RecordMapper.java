@@ -1,6 +1,6 @@
 package com.kiwi.kiwiserver.domain.dailyrecord.record.mapper;
 
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.response.CbtSessionSummaryResponse;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.dto.response.ThinkingToolSessionSummaryResponse;
 import com.kiwi.kiwiserver.domain.dailyrecord.diary.dto.response.DiaryResponse;
 import com.kiwi.kiwiserver.domain.dailyrecord.keyword.dto.response.KeywordResponse;
 import com.kiwi.kiwiserver.domain.dailyrecord.record.dto.response.RecordDetailResponse;
@@ -27,7 +27,7 @@ public class RecordMapper {
             Record record,
             DiaryResponse diary,
             List<KeywordResponse> keywords,
-            List<CbtSessionSummaryResponse> cbtSessions
+            List<ThinkingToolSessionSummaryResponse> thinkingToolSessions
     ) {
         return new RecordDetailResponse(
                 record.getRecordId(),
@@ -37,7 +37,7 @@ public class RecordMapper {
                 record.getUpdatedAt(),
                 diary,
                 keywords,
-                cbtSessions
+                thinkingToolSessions
         );
     }
 }

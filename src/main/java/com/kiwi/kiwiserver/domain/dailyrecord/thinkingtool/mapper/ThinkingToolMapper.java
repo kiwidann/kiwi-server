@@ -1,14 +1,14 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.mapper;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.mapper;
 
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.response.*;
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity.*;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.dto.response.*;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
 
 @Component
-public class CbtMapper {
+public class ThinkingToolMapper {
 
     public TagResponse toTagResponse(Tag tag) {
         return new TagResponse(
@@ -17,8 +17,8 @@ public class CbtMapper {
         );
     }
 
-    public CbtQuestionResponse toQuestionResponse(CbtQuestion question) {
-        return new CbtQuestionResponse(
+    public ThinkingToolQuestionResponse toQuestionResponse(ThinkingToolQuestion question) {
+        return new ThinkingToolQuestionResponse(
                 question.getQuestionId(),
                 question.getToolCode(),
                 question.getCode(),
@@ -29,10 +29,10 @@ public class CbtMapper {
         );
     }
 
-    public CbtAnswerResponse toAnswerResponse(CbtAnswer answer) {
-        CbtQuestion question = answer.getQuestion();
+    public ThinkingToolAnswerResponse toAnswerResponse(ThinkingToolAnswer answer) {
+        ThinkingToolQuestion question = answer.getQuestion();
 
-        return new CbtAnswerResponse(
+        return new ThinkingToolAnswerResponse(
                 question.getQuestionId(),
                 question.getToolCode(),
                 question.getCode(),
@@ -43,9 +43,9 @@ public class CbtMapper {
         );
     }
 
-    public CbtSessionSummaryResponse toSessionSummaryResponse(CbtSession session) {
-        return new CbtSessionSummaryResponse(
-                session.getCbtSessionId(),
+    public ThinkingToolSessionSummaryResponse toSessionSummaryResponse(ThinkingToolSession session) {
+        return new ThinkingToolSessionSummaryResponse(
+                session.getThinkingToolSessionId(),
                 session.getTag().getTagId(),
                 session.getTag().getName(),
                 session.getToolCode(),
@@ -55,9 +55,9 @@ public class CbtMapper {
         );
     }
 
-    public CbtSessionResponse toSessionResponse(CbtSession session, List<CbtAnswer> answers) {
-        return new CbtSessionResponse(
-                session.getCbtSessionId(),
+    public ThinkingToolSessionResponse toSessionResponse(ThinkingToolSession session, List<ThinkingToolAnswer> answers) {
+        return new ThinkingToolSessionResponse(
+                session.getThinkingToolSessionId(),
                 session.getRecord().getRecordId(),
                 session.getTag().getTagId(),
                 session.getTag().getName(),

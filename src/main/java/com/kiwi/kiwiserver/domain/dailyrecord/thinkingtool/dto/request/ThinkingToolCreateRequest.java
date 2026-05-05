@@ -1,6 +1,6 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.request;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.dto.request;
 
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity.ThinkingToolCode;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity.ThinkingToolCode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record CbtCreateRequest(
+public record ThinkingToolCreateRequest(
 
         @NotNull(message = "생각 정리 도구 코드는 필수입니다")
         ThinkingToolCode toolCode,
@@ -28,6 +28,6 @@ public record CbtCreateRequest(
 
         @NotNull(message = "답변 목록은 필수입니다")
         @Valid
-        List<CbtAnswerRequest> answers
+        List<ThinkingToolAnswerRequest> answers
 ) {
 }
