@@ -1,6 +1,6 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.repository;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.repository;
 
-import com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity.Tag;
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

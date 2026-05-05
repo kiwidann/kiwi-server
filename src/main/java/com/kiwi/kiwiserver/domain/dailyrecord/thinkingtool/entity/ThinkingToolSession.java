@@ -1,4 +1,4 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity;
 
 import com.kiwi.kiwiserver.domain.dailyrecord.record.entity.Record;
 import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
@@ -8,18 +8,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
-
 @Entity
 @Table(name = "cbt_sessions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CbtSession extends BaseTimeEntity {
+public class ThinkingToolSession extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cbt_session_id")
-    private Long cbtSessionId;
+    private Long thinkingToolSessionId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
@@ -37,6 +35,10 @@ public class CbtSession extends BaseTimeEntity {
     )
     private Tag tag;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tool_code", nullable = false, length = 50)
+    private ThinkingToolCode toolCode;
+
     @Column(name = "before_emotion_score")
     private Integer beforeEmotionScore;
 
@@ -44,9 +46,16 @@ public class CbtSession extends BaseTimeEntity {
     private Integer afterEmotionScore;
 
     @Builder
-    private CbtSession(Record record, Tag tag, Integer beforeEmotionScore, Integer afterEmotionScore) {
+    private ThinkingToolSession(
+            Record record,
+            Tag tag,
+            ThinkingToolCode toolCode,
+            Integer beforeEmotionScore,
+            Integer afterEmotionScore
+    ) {
         this.record = record;
         this.tag = tag;
+        this.toolCode = toolCode;
         this.beforeEmotionScore = beforeEmotionScore;
         this.afterEmotionScore = afterEmotionScore;
     }
