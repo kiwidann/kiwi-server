@@ -1,4 +1,4 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity;
 
 public enum QuestionInputType {
     TEXT,

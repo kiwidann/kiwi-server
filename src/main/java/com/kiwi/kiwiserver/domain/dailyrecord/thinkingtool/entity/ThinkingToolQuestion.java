@@ -1,4 +1,4 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CbtQuestion {
+public class ThinkingToolQuestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

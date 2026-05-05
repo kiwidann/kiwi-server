@@ -1,4 +1,4 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity;
 
 import com.kiwi.kiwiserver.domain.dailyrecord.record.entity.Record;
 import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @Table(name = "cbt_sessions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CbtSession extends BaseTimeEntity {
+public class ThinkingToolSession extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cbt_session_id")
-    private Long cbtSessionId;
+    private Long thinkingToolSessionId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
@@ -46,7 +46,7 @@ public class CbtSession extends BaseTimeEntity {
     private Integer afterEmotionScore;
 
     @Builder
-    private CbtSession(
+    private ThinkingToolSession(
             Record record,
             Tag tag,
             ThinkingToolCode toolCode,

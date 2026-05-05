@@ -1,4 +1,4 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity;
 
 import com.kiwi.kiwiserver.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "cbt_answers")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CbtAnswer extends BaseTimeEntity {
+public class ThinkingToolAnswer extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class CbtAnswer extends BaseTimeEntity {
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_cbt_answers_session")
     )
-    private CbtSession cbtSession;
+    private ThinkingToolSession thinkingToolSession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
@@ -31,7 +31,7 @@ public class CbtAnswer extends BaseTimeEntity {
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_cbt_answers_question")
     )
-    private CbtQuestion question;
+    private ThinkingToolQuestion question;
 
     @Column(name = "answer_text")
     private String answerText;
@@ -39,13 +39,13 @@ public class CbtAnswer extends BaseTimeEntity {
     @Column(name = "answer_value")
     private Integer answerValue;
 
-    public CbtAnswer(
-            CbtSession cbtSession,
-            CbtQuestion question,
+    public ThinkingToolAnswer(
+            ThinkingToolSession thinkingToolSession,
+            ThinkingToolQuestion question,
             String answerText,
             Integer answerValue
     ) {
-        this.cbtSession = cbtSession;
+        this.thinkingToolSession = thinkingToolSession;
         this.question = question;
         this.answerText = answerText;
         this.answerValue = answerValue;

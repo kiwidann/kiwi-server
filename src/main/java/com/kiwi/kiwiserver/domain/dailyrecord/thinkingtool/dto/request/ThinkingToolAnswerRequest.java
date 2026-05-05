@@ -1,10 +1,10 @@
-package com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.request;
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record CbtAnswerRequest(
+public record ThinkingToolAnswerRequest(
 
         @NotNull(message = "질문 ID는 필수입니다")
         Long questionId,
