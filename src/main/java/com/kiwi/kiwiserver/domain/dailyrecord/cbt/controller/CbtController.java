@@ -2,6 +2,7 @@ package com.kiwi.kiwiserver.domain.dailyrecord.cbt.controller;
 
 import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.request.CbtCreateRequest;
 import com.kiwi.kiwiserver.domain.dailyrecord.cbt.dto.response.*;
+import com.kiwi.kiwiserver.domain.dailyrecord.cbt.entity.ThinkingToolCode;
 import com.kiwi.kiwiserver.domain.dailyrecord.cbt.service.CbtService;
 import com.kiwi.kiwiserver.global.response.ApiResponse;
 import com.kiwi.kiwiserver.global.security.util.SecurityUtils;
@@ -16,25 +17,27 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/cbt")
-@Tag(name = "CBT", description = "CBT API")
+@Tag(name = "Thinking Tool", description = "생각 정리 도구 API")
 public class CbtController {
 
     private final CbtService cbtService;
 
     @GetMapping("/tags")
-    @Operation(summary = "CBT 태그 목록 조회")
+    @Operation(summary = "생각 정리 도구 태그 목록 조회")
     public ApiResponse<List<TagResponse>> getTags() {
         return ApiResponse.success(cbtService.getTags());
     }
 
     @GetMapping("/questions")
-    @Operation(summary = "CBT 질문 목록 조회")
-    public ApiResponse<List<CbtQuestionResponse>> getQuestions() {
-        return ApiResponse.success(cbtService.getQuestions());
+    @Operation(summary = "생각 정리 도구 질문 목록 조회")
+    public ApiResponse<List<CbtQuestionResponse>> getQuestions(
+            @RequestParam ThinkingToolCode toolCode
+    ) {
+        return ApiResponse.success(cbtService.getQuestions(toolCode));
     }
 
     @PostMapping("/records/{recordId}")
-    @Operation(summary = "CBT 세션 생성")
+    @Operation(summary = "생각 정리 도구 세션 생성")
     public ApiResponse<CbtSessionResponse> createCbt(
             @PathVariable Long recordId,
             @Valid @RequestBody CbtCreateRequest request
@@ -44,7 +47,7 @@ public class CbtController {
     }
 
     @GetMapping("/records/{recordId}")
-    @Operation(summary = "특정 기록의 CBT 세션 목록 조회")
+    @Operation(summary = "특정 기록의 생각 정리 도구 세션 목록 조회")
     public ApiResponse<List<CbtSessionSummaryResponse>> getCbtSessions(
             @PathVariable Long recordId
     ) {
@@ -53,7 +56,7 @@ public class CbtController {
     }
 
     @GetMapping("/records/{recordId}/{cbtSessionId}")
-    @Operation(summary = "CBT 세션 상세 조회")
+    @Operation(summary = "생각 정리 도구 세션 상세 조회")
     public ApiResponse<CbtSessionResponse> getCbtSession(
             @PathVariable Long recordId,
             @PathVariable Long cbtSessionId

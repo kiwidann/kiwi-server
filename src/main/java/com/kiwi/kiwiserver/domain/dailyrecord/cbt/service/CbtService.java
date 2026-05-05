@@ -38,8 +38,8 @@ public class CbtService {
                 .toList();
     }
 
-    public List<CbtQuestionResponse> getQuestions() {
-        return questionRepository.findAllByIsActiveTrueOrderByDisplayOrderAsc()
+    public List<CbtQuestionResponse> getQuestions(ThinkingToolCode toolCode) {
+        return questionRepository.findAllByToolCodeAndIsActiveTrueOrderByDisplayOrderAsc(toolCode)
                 .stream()
                 .map(cbtMapper::toQuestionResponse)
                 .toList();
@@ -64,14 +64,24 @@ public class CbtService {
             throw new BusinessException(CbtErrorCode.CBT_QUESTION_NOT_FOUND);
         }
 
+        validateQuestionsBelongToTool(questions, request.toolCode());
+
         Map<Long, CbtQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(CbtQuestion::getQuestionId, Function.identity()));
 
-        validateRequiredQuestions(questions, request.answers());
+        List<CbtQuestion> requiredQuestions =
+                questionRepository.findAllByToolCodeAndIsActiveTrueOrderByDisplayOrderAsc(request.toolCode())
+                        .stream()
+                        .filter(CbtQuestion::isRequired)
+                        .toList();
+
+        validateRequiredQuestions(requiredQuestions, request.answers());
+        validateAnswerByInputType(questionMap, request.answers());
 
         CbtSession session = CbtSession.builder()
                 .record(record)
                 .tag(tag)
+                .toolCode(request.toolCode())
                 .beforeEmotionScore(request.beforeEmotionScore())
                 .afterEmotionScore(request.afterEmotionScore())
                 .build();
@@ -82,7 +92,8 @@ public class CbtService {
                 .map(answerRequest -> new CbtAnswer(
                         savedSession,
                         questionMap.get(answerRequest.questionId()),
-                        answerRequest.answerText()
+                        answerRequest.answerText(),
+                        answerRequest.answerValue()
                 ))
                 .toList();
 
@@ -117,6 +128,7 @@ public class CbtService {
         }
 
         Set<Long> distinctQuestionIds = new HashSet<>();
+
         for (CbtAnswerRequest answer : answers) {
             if (!distinctQuestionIds.add(answer.questionId())) {
                 throw new BusinessException(CbtErrorCode.CBT_DUPLICATE_QUESTION);
@@ -124,21 +136,80 @@ public class CbtService {
         }
     }
 
-    private void validateRequiredQuestions(List<CbtQuestion> questions, List<CbtAnswerRequest> answers) {
-        Map<Long, String> answerMap = answers.stream()
-                .collect(Collectors.toMap(
-                        CbtAnswerRequest::questionId,
-                        answer -> answer.answerText() == null ? "" : answer.answerText()
-                ));
+    private void validateQuestionsBelongToTool(List<CbtQuestion> questions, ThinkingToolCode toolCode) {
+        boolean hasInvalidQuestion = questions.stream()
+                .anyMatch(question -> question.getToolCode() != toolCode);
 
-        for (CbtQuestion question : questions) {
-            if (question.isRequired()) {
-                String answerText = answerMap.get(question.getQuestionId());
-                if (answerText == null || answerText.isBlank()) {
+        if (hasInvalidQuestion) {
+            throw new BusinessException(CbtErrorCode.CBT_INVALID_REQUEST);
+        }
+    }
+
+    private void validateRequiredQuestions(List<CbtQuestion> requiredQuestions, List<CbtAnswerRequest> answers) {
+        Set<Long> answeredQuestionIds = answers.stream()
+                .map(CbtAnswerRequest::questionId)
+                .collect(Collectors.toSet());
+
+        for (CbtQuestion question : requiredQuestions) {
+            if (!answeredQuestionIds.contains(question.getQuestionId())) {
+                throw new BusinessException(CbtErrorCode.CBT_REQUIRED_ANSWER_MISSING);
+            }
+        }
+    }
+
+    private void validateAnswerByInputType(
+            Map<Long, CbtQuestion> questionMap,
+            List<CbtAnswerRequest> answers
+    ) {
+        for (CbtAnswerRequest answer : answers) {
+            CbtQuestion question = questionMap.get(answer.questionId());
+
+            if (question == null) {
+                throw new BusinessException(CbtErrorCode.CBT_QUESTION_NOT_FOUND);
+            }
+
+            validateSingleAnswer(question, answer);
+        }
+    }
+
+    private void validateSingleAnswer(CbtQuestion question, CbtAnswerRequest answer) {
+        QuestionInputType inputType = question.getInputType();
+
+        switch (inputType) {
+            case TEXT, CHECKBOX -> {
+                if (answer.answerValue() != null) {
+                    throw new BusinessException(CbtErrorCode.CBT_INVALID_REQUEST);
+                }
+
+                if (question.isRequired() && isBlank(answer.answerText())) {
                     throw new BusinessException(CbtErrorCode.CBT_REQUIRED_ANSWER_MISSING);
                 }
             }
+
+            case SLIDER -> {
+                if (!isBlank(answer.answerText())) {
+                    throw new BusinessException(CbtErrorCode.CBT_INVALID_REQUEST);
+                }
+
+                if (question.isRequired() && answer.answerValue() == null) {
+                    throw new BusinessException(CbtErrorCode.CBT_REQUIRED_ANSWER_MISSING);
+                }
+
+                if (answer.answerValue() != null && (answer.answerValue() < 0 || answer.answerValue() > 100)) {
+                    throw new BusinessException(CbtErrorCode.CBT_INVALID_REQUEST);
+                }
+            }
+
+            case GUIDE -> {
+                if (!isBlank(answer.answerText()) || answer.answerValue() != null) {
+                    throw new BusinessException(CbtErrorCode.CBT_INVALID_REQUEST);
+                }
+            }
         }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private Record getOwnedRecord(Long userId, Long recordId) {
