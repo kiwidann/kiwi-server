@@ -5,24 +5,24 @@ import lombok.Getter;
 import java.time.LocalDate;
 
 @Getter
-public class CbtSessionStatResponse {
+public class ThinkingToolSessionStatResponse {
 
-    private final Long cbtSessionId;
+    private final Long thinkingToolSessionId;
     private final LocalDate recordDate;
     private final Integer beforeEmotionScore;
     private final Integer afterEmotionScore;
     private final Integer improvement;
     private final String tagName;
 
-    public CbtSessionStatResponse(
-            Long cbtSessionId,
+    public ThinkingToolSessionStatResponse(
+            Long thinkingToolSessionId,
             LocalDate recordDate,
             Integer beforeEmotionScore,
             Integer afterEmotionScore,
             Integer improvement,
             String tagName
     ) {
-        this.cbtSessionId = cbtSessionId;
+        this.thinkingToolSessionId = thinkingToolSessionId;
         this.recordDate = recordDate;
         this.beforeEmotionScore = beforeEmotionScore;
         this.afterEmotionScore = afterEmotionScore;

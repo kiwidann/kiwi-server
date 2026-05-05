@@ -20,10 +20,10 @@ public class ReportDashboardResponse {
 
     private List<KeywordStatResponse> topKeywords;
 
-    private long cbtCount;
-    private double averageCbtBeforeScore;
-    private double averageCbtAfterScore;
-    private double averageCbtImprovement;
+    private long thinkingToolCount;
+    private double averageThinkingToolBeforeScore;
+    private double averageThinkingToolAfterScore;
+    private double averageThinkingToolImprovement;
 
     private List<String> insights;
 }

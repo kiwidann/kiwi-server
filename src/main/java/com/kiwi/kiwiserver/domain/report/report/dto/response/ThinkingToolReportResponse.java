@@ -8,16 +8,16 @@ import java.util.List;
 
 @Getter
 @Builder
-public class CbtReportResponse {
+public class ThinkingToolReportResponse {
 
     private LocalDate from;
     private LocalDate to;
 
-    private long cbtCount;
+    private long thinkingToolCount;
     private double averageBeforeScore;
     private double averageAfterScore;
     private double averageImprovement;
 
-    private List<CbtTagStatResponse> tagStats;
-    private List<CbtSessionStatResponse> sessionStats;
+    private List<ThinkingToolTagStatResponse> tagStats;
+    private List<ThinkingToolSessionStatResponse> sessionStats;
 }

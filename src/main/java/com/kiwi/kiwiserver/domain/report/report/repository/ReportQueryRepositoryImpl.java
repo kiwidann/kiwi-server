@@ -1,12 +1,13 @@
 package com.kiwi.kiwiserver.domain.report.report.repository;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtSessionStatResponse;
-import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtTagStatResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendPointResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolSessionStatResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolTagStatResponse;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -79,7 +80,7 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     @Override
     public List<EmotionTrendPointResponse> findEmotionTrend(Long userId, LocalDate from, LocalDate to) {
         return em.createQuery("""
-                select new com.kiwi.kiwiserver.domain.report.dto.response.EmotionTrendPointResponse(
+                select new com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendPointResponse(
                     r.recordDate,
                     r.moodScore
                 )
@@ -97,7 +98,7 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     @Override
     public List<KeywordStatResponse> findTopKeywords(Long userId, LocalDate from, LocalDate to, int limit) {
         return em.createQuery("""
-                select new com.kiwi.kiwiserver.domain.report.dto.response.KeywordStatResponse(
+                select new com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordStatResponse(
                     k.name,
                     count(k),
                     avg(r.moodScore)
@@ -118,12 +119,12 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     }
 
     @Override
-    public long countCbtSessions(Long userId, LocalDate from, LocalDate to) {
+    public long countThinkingToolSessions(Long userId, LocalDate from, LocalDate to) {
         Long result = em.createQuery("""
-                select count(c)
-                from CbtSession c
-                where c.record.user.userId = :userId
-                  and c.record.recordDate between :from and :to
+                select count(s)
+                from ThinkingToolSession s
+                where s.record.user.userId = :userId
+                  and s.record.recordDate between :from and :to
                 """, Long.class)
                 .setParameter("userId", userId)
                 .setParameter("from", from)
@@ -134,12 +135,12 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     }
 
     @Override
-    public double findAverageCbtBeforeScore(Long userId, LocalDate from, LocalDate to) {
+    public double findAverageThinkingToolBeforeScore(Long userId, LocalDate from, LocalDate to) {
         Double result = em.createQuery("""
-                select avg(c.beforeEmotionScore)
-                from CbtSession c
-                where c.record.user.userId = :userId
-                  and c.record.recordDate between :from and :to
+                select avg(s.beforeEmotionScore)
+                from ThinkingToolSession s
+                where s.record.user.userId = :userId
+                  and s.record.recordDate between :from and :to
                 """, Double.class)
                 .setParameter("userId", userId)
                 .setParameter("from", from)
@@ -150,12 +151,12 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     }
 
     @Override
-    public double findAverageCbtAfterScore(Long userId, LocalDate from, LocalDate to) {
+    public double findAverageThinkingToolAfterScore(Long userId, LocalDate from, LocalDate to) {
         Double result = em.createQuery("""
-                select avg(c.afterEmotionScore)
-                from CbtSession c
-                where c.record.user.userId = :userId
-                  and c.record.recordDate between :from and :to
+                select avg(s.afterEmotionScore)
+                from ThinkingToolSession s
+                where s.record.user.userId = :userId
+                  and s.record.recordDate between :from and :to
                 """, Double.class)
                 .setParameter("userId", userId)
                 .setParameter("from", from)
@@ -166,12 +167,12 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     }
 
     @Override
-    public double findAverageCbtImprovement(Long userId, LocalDate from, LocalDate to) {
+    public double findAverageThinkingToolImprovement(Long userId, LocalDate from, LocalDate to) {
         Double result = em.createQuery("""
-                select avg(c.afterEmotionScore - c.beforeEmotionScore)
-                from CbtSession c
-                where c.record.user.userId = :userId
-                  and c.record.recordDate between :from and :to
+                select avg(s.afterEmotionScore - s.beforeEmotionScore)
+                from ThinkingToolSession s
+                where s.record.user.userId = :userId
+                  and s.record.recordDate between :from and :to
                 """, Double.class)
                 .setParameter("userId", userId)
                 .setParameter("from", from)
@@ -182,20 +183,20 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     }
 
     @Override
-    public List<CbtTagStatResponse> findCbtTagStats(Long userId, LocalDate from, LocalDate to) {
+    public List<ThinkingToolTagStatResponse> findThinkingToolTagStats(Long userId, LocalDate from, LocalDate to) {
         return em.createQuery("""
-                select new com.kiwi.kiwiserver.domain.report.dto.response.CbtTagStatResponse(
+                select new com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolTagStatResponse(
                     t.name,
-                    count(c),
-                    avg(c.afterEmotionScore - c.beforeEmotionScore)
+                    count(s),
+                    avg(s.afterEmotionScore - s.beforeEmotionScore)
                 )
-                from CbtSession c
-                join c.tag t
-                where c.record.user.userId = :userId
-                  and c.record.recordDate between :from and :to
+                from ThinkingToolSession s
+                join s.tag t
+                where s.record.user.userId = :userId
+                  and s.record.recordDate between :from and :to
                 group by t.name
-                order by count(c) desc
-                """, CbtTagStatResponse.class)
+                order by count(s) desc
+                """, ThinkingToolTagStatResponse.class)
                 .setParameter("userId", userId)
                 .setParameter("from", from)
                 .setParameter("to", to)
@@ -203,22 +204,22 @@ public class ReportQueryRepositoryImpl implements ReportQueryRepository {
     }
 
     @Override
-    public List<CbtSessionStatResponse> findCbtSessionStats(Long userId, LocalDate from, LocalDate to) {
+    public List<ThinkingToolSessionStatResponse> findThinkingToolSessionStats(Long userId, LocalDate from, LocalDate to) {
         return em.createQuery("""
-                select new com.kiwi.kiwiserver.domain.report.dto.response.CbtSessionStatResponse(
-                    c.cbtSessionId,
-                    c.record.recordDate,
-                    c.beforeEmotionScore,
-                    c.afterEmotionScore,
-                    (c.afterEmotionScore - c.beforeEmotionScore),
+                select new com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolSessionStatResponse(
+                    s.thinkingToolSessionId,
+                    s.record.recordDate,
+                    s.beforeEmotionScore,
+                    s.afterEmotionScore,
+                    (s.afterEmotionScore - s.beforeEmotionScore),
                     t.name
                 )
-                from CbtSession c
-                join c.tag t
-                where c.record.user.userId = :userId
-                  and c.record.recordDate between :from and :to
-                order by c.record.recordDate asc, c.cbtSessionId asc
-                """, CbtSessionStatResponse.class)
+                from ThinkingToolSession s
+                join s.tag t
+                where s.record.user.userId = :userId
+                  and s.record.recordDate between :from and :to
+                order by s.record.recordDate asc, s.thinkingToolSessionId asc
+                """, ThinkingToolSessionStatResponse.class)
                 .setParameter("userId", userId)
                 .setParameter("from", from)
                 .setParameter("to", to)

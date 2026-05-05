@@ -1,6 +1,6 @@
 package com.kiwi.kiwiserver.domain.report.report.service;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.ReportDashboardResponse;
@@ -15,5 +15,5 @@ public interface ReportService {
 
     KeywordReportResponse getKeywordReport(Long userId, LocalDate from, LocalDate to, int limit);
 
-    CbtReportResponse getCbtReport(Long userId, LocalDate from, LocalDate to);
+    ThinkingToolReportResponse getThinkingToolReport(Long userId, LocalDate from, LocalDate to);
 }

@@ -1,6 +1,6 @@
 package com.kiwi.kiwiserver.domain.report.report.controller;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtReportResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.ReportDashboardResponse;
@@ -56,13 +56,13 @@ public class ReportController {
         return ApiResponse.success(reportService.getKeywordReport(userId, from, to, limit));
     }
 
-    @GetMapping("/cbt")
-    @Operation(summary = "CBT 리포트 조회")
-    public ApiResponse<CbtReportResponse> getCbtReport(
+    @GetMapping("/thinking-tool")
+    @Operation(summary = "생각정리도구 리포트 조회")
+    public ApiResponse<ThinkingToolReportResponse> getThinkingToolReport(
             @RequestParam LocalDate from,
             @RequestParam LocalDate to
     ) {
         Long userId = SecurityUtils.getCurrentUserId();
-        return ApiResponse.success(reportService.getCbtReport(userId, from, to));
+        return ApiResponse.success(reportService.getThinkingToolReport(userId, from, to));
     }
 }

@@ -1,9 +1,9 @@
 package com.kiwi.kiwiserver.domain.report.report.service;
 
-import com.kiwi.kiwiserver.domain.report.report.dto.response.CbtReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.EmotionTrendResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.KeywordReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.dto.response.ReportDashboardResponse;
+import com.kiwi.kiwiserver.domain.report.report.dto.response.ThinkingToolReportResponse;
 import com.kiwi.kiwiserver.domain.report.report.repository.ReportQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,15 +29,15 @@ public class ReportServiceImpl implements ReportService {
 
         var topKeywords = reportQueryRepository.findTopKeywords(userId, from, to, 3);
 
-        long cbtCount = reportQueryRepository.countCbtSessions(userId, from, to);
-        double averageBeforeScore = reportQueryRepository.findAverageCbtBeforeScore(userId, from, to);
-        double averageAfterScore = reportQueryRepository.findAverageCbtAfterScore(userId, from, to);
-        double averageImprovement = reportQueryRepository.findAverageCbtImprovement(userId, from, to);
+        long thinkingToolCount = reportQueryRepository.countThinkingToolSessions(userId, from, to);
+        double averageBeforeScore = reportQueryRepository.findAverageThinkingToolBeforeScore(userId, from, to);
+        double averageAfterScore = reportQueryRepository.findAverageThinkingToolAfterScore(userId, from, to);
+        double averageImprovement = reportQueryRepository.findAverageThinkingToolImprovement(userId, from, to);
 
         List<String> insights = createInsights(
                 averageEmotionScore,
                 topKeywords.stream().map(k -> k.getKeyword()).toList(),
-                cbtCount,
+                thinkingToolCount,
                 averageImprovement
         );
 
@@ -49,10 +49,10 @@ public class ReportServiceImpl implements ReportService {
                 .lowestEmotionScore(lowestEmotionScore)
                 .highestEmotionScore(highestEmotionScore)
                 .topKeywords(topKeywords)
-                .cbtCount(cbtCount)
-                .averageCbtBeforeScore(averageBeforeScore)
-                .averageCbtAfterScore(averageAfterScore)
-                .averageCbtImprovement(averageImprovement)
+                .thinkingToolCount(thinkingToolCount)
+                .averageThinkingToolBeforeScore(averageBeforeScore)
+                .averageThinkingToolAfterScore(averageAfterScore)
+                .averageThinkingToolImprovement(averageImprovement)
                 .insights(insights)
                 .build();
     }
@@ -86,19 +86,19 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public CbtReportResponse getCbtReport(Long userId, LocalDate from, LocalDate to) {
-        long cbtCount = reportQueryRepository.countCbtSessions(userId, from, to);
-        double averageBeforeScore = reportQueryRepository.findAverageCbtBeforeScore(userId, from, to);
-        double averageAfterScore = reportQueryRepository.findAverageCbtAfterScore(userId, from, to);
-        double averageImprovement = reportQueryRepository.findAverageCbtImprovement(userId, from, to);
+    public ThinkingToolReportResponse getThinkingToolReport(Long userId, LocalDate from, LocalDate to) {
+        long thinkingToolCount = reportQueryRepository.countThinkingToolSessions(userId, from, to);
+        double averageBeforeScore = reportQueryRepository.findAverageThinkingToolBeforeScore(userId, from, to);
+        double averageAfterScore = reportQueryRepository.findAverageThinkingToolAfterScore(userId, from, to);
+        double averageImprovement = reportQueryRepository.findAverageThinkingToolImprovement(userId, from, to);
 
-        var tagStats = reportQueryRepository.findCbtTagStats(userId, from, to);
-        var sessionStats = reportQueryRepository.findCbtSessionStats(userId, from, to);
+        var tagStats = reportQueryRepository.findThinkingToolTagStats(userId, from, to);
+        var sessionStats = reportQueryRepository.findThinkingToolSessionStats(userId, from, to);
 
-        return CbtReportResponse.builder()
+        return ThinkingToolReportResponse.builder()
                 .from(from)
                 .to(to)
-                .cbtCount(cbtCount)
+                .thinkingToolCount(thinkingToolCount)
                 .averageBeforeScore(averageBeforeScore)
                 .averageAfterScore(averageAfterScore)
                 .averageImprovement(averageImprovement)
@@ -110,7 +110,7 @@ public class ReportServiceImpl implements ReportService {
     private List<String> createInsights(
             double averageEmotionScore,
             List<String> topKeywords,
-            long cbtCount,
+            long thinkingToolCount,
             double averageImprovement
     ) {
         List<String> insights = new ArrayList<>();
@@ -123,8 +123,8 @@ public class ReportServiceImpl implements ReportService {
             insights.add("자주 기록된 감정 키워드는 " + String.join(", ", topKeywords) + " 이에요");
         }
 
-        if (cbtCount > 0 && averageImprovement > 0) {
-            insights.add("CBT 이후 감정 점수가 평균적으로 상승하는 경향이 보여요");
+        if (thinkingToolCount > 0 && averageImprovement > 0) {
+            insights.add("생각정리도구 사용 이후 감정 점수가 평균적으로 상승하는 경향이 보여요");
         }
 
         if (insights.isEmpty()) {
