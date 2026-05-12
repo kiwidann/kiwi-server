@@ -18,7 +18,9 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "https://kiwi-app-i9gw9ezsa-jiyoung-6752s-projects.vercel.app"
+                "https://kiwi-app-i9gw9ezsa-jiyoung-6752s-projects.vercel.app",
+                "https://kiwi-app-dev-git-dev-jiyoung-6752s-projects.vercel.app",
+                "https://kiwi-app-dev.vercel.app"
         ));
 
         config.setAllowedMethods(List.of(
