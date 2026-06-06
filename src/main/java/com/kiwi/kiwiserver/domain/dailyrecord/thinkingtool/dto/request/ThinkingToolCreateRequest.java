@@ -1,0 +1,33 @@
+package com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.dto.request;
+
+import com.kiwi.kiwiserver.domain.dailyrecord.thinkingtool.entity.ThinkingToolCode;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+public record ThinkingToolCreateRequest(
+
+        @NotNull(message = "생각 정리 도구 코드는 필수입니다")
+        ThinkingToolCode toolCode,
+
+        @NotNull(message = "태그 ID는 필수입니다")
+        Long tagId,
+
+        @NotNull(message = "도구 사용 전 감정 점수는 필수입니다")
+        @Min(value = 0, message = "도구 사용 전 감정 점수는 0 이상이어야 합니다")
+        @Max(value = 10, message = "도구 사용 전 감정 점수는 10 이하여야 합니다")
+        Integer beforeEmotionScore,
+
+        @NotNull(message = "도구 사용 후 감정 점수는 필수입니다")
+        @Min(value = 0, message = "도구 사용 후 감정 점수는 0 이상이어야 합니다")
+        @Max(value = 10, message = "도구 사용 후 감정 점수는 10 이하여야 합니다")
+        Integer afterEmotionScore,
+
+        @NotNull(message = "답변 목록은 필수입니다")
+        @Valid
+        List<ThinkingToolAnswerRequest> answers
+) {
+}
