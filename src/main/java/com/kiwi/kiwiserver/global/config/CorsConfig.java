@@ -20,7 +20,8 @@ public class CorsConfig {
                 "http://localhost:5173",
                 "https://kiwi-app-i9gw9ezsa-jiyoung-6752s-projects.vercel.app",
                 "https://kiwi-app-dev-git-dev-jiyoung-6752s-projects.vercel.app",
-                "https://kiwi-app-dev.vercel.app"
+                "https://kiwi-app-dev.vercel.app",
+                "https://api.kiwi-server.uk"
         ));
 
         config.setAllowedMethods(List.of(
